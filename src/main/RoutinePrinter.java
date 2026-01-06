@@ -1,70 +1,55 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import algorithm.CSPState;
-import algorithm.Value;
 import algorithm.Variable;
+import algorithm.Value;
 import entity.Course;
-import entity.Room;
+import entity.Section;
+
+import java.util.*;
 
 public class RoutinePrinter {
 
-	private static final String[] DAYS = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday" };
+    private static final String[] DAYS = {
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+    };
 
-	public static void print(CSPState state) {
-		System.out.println("\n========== GENERATED WEEKLY ROUTINE ==========\n");
+    public static void print(CSPState state) {
 
-		// Group by Section
-		Map<String, List<Variable>> bySection = new HashMap();
+        System.out.println("\n===== FINAL ROUTINE =====\n");
 
-		for (Variable v : state.variables.values()) {
-			bySection.computeIfAbsent(v.course.sectionId, k -> new ArrayList<>()).add(v);
-		}
+        List<Variable> vars = new ArrayList<>(state.variables.values());
 
-		for (String sectionId : bySection.keySet()) {
-			System.out.println("SECTION: " + sectionId);
-			System.out.println("----------------------------------");
+        // Sort by day → startSlot
+        vars.sort(Comparator
+                .comparingInt((Variable v) -> v.assignedValue.day)
+                .thenComparingInt(v -> v.assignedValue.startSlot)
+        );
 
-			List<Variable> list = bySection.get(sectionId);
+        for (Variable v : vars) {
+            Value val = v.assignedValue;
+            Course c = v.course;
+            Section s = v.section;
 
-			// Sort by day then time
-			list.sort(Comparator.comparingInt((Variable v) -> v.assignedValue.day)
-					.thenComparingInt(v -> v.assignedValue.startSlot));
+            String day = DAYS[val.day];
+            String time = timeRange(val.startSlot, val.slotCount);
 
-			for (Variable v : list) {
-				printEntry(v, state);
-			}
+            System.out.println(
+                "Course: " + c.id +
+                " | Section: " + s.id +
+                " | Teacher: " + val.teacherId +
+                " | Room: " + val.roomId +
+                " | Day: " + day +
+                " | Time: " + time
+            );
+        }
 
-			System.out.println();
-		}
-	}
+        System.out.println("\n=========================\n");
+    }
 
-	private static void printEntry(Variable v, CSPState state) {
-		Value val = v.assignedValue;
-		Course c = v.course;
-		Room r = state.rooms.get(val.roomId);
-
-		String time = slotToTime(val.startSlot, val.slotCount);
-
-		System.out.printf("%-10s | %-9s | %-20s | %-5s | %-4s%n", DAYS[val.day], time, c.id + " (" + c.type + ")", r.id,
-				r.type);
-	}
-
-	private static String slotToTime(int start, int len) {
-		int startMin = start * 30;
-		int endMin = startMin + len * 30;
-
-		return format(startMin) + "-" + format(endMin);
-	}
-
-	private static String format(int mins) {
-		int h = 8 + mins / 60; // assume day starts at 8:00
-		int m = mins % 60;
-		return String.format("%02d:%02d", h, m);
-	}
+    private static String timeRange(int startSlot, int slotCount) {
+        float startHour = 9 + ((float)startSlot*30)/60;
+        float endHour = startHour + ((float)slotCount*30)/60;
+        return startHour + ":00 - " + endHour + ":00";
+    }
 }

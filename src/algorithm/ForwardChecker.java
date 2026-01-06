@@ -15,7 +15,7 @@ public class ForwardChecker {
 			Iterator<Value> it = n.domain.iterator();
 			while (it.hasNext()) {
 				Value nv = it.next();
-				if (conflict(val, nv)) {
+				if (conflict(val, nv, v, n)) {
 					removed.computeIfAbsent(nid, k -> new ArrayList<>()).add(nv);
 					it.remove();
 				}
@@ -34,7 +34,13 @@ public class ForwardChecker {
 		}
 	}
 
-	private static boolean conflict(Value a, Value b) {
-		return a.day == b.day && (a.slotMask & b.slotMask) != 0;
+	private static boolean conflict(Value a, Value b, Variable aVar, Variable bVar) {
+		if (a.day == b.day && (a.slotMask & b.slotMask) != 0) {
+			return true;
+		}
+		if (aVar.course.id.equals(bVar.course.id) && aVar.section.id.equals(bVar.section.id) && a.day == b.day) {
+			return true;
+		}
+		return false;
 	}
 }

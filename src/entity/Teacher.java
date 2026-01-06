@@ -5,9 +5,9 @@ import java.util.Set;
 public class Teacher {
 	public String id;
 	public Set<String> qualifiedCourseIds;
-	public long[] availability; // per day bitmask
+	public boolean[] availability; // per day bitmask
 
-	public Teacher(String id, Set<String> qualifiedCourseIds, long[] availability) {
+	public Teacher(String id, Set<String> qualifiedCourseIds, boolean[] availability) {
 		this.id = id;
 		this.qualifiedCourseIds = qualifiedCourseIds;
 		this.availability = availability;

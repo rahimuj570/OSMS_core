@@ -1,17 +1,17 @@
 package entity;
 
+import java.util.Set;
+
 public class Course {
 	public String id;
 	public CourseType type;
-	public String teacherId;
-	public String sectionId;
-//	public int students;
+	public Set<String> teacherIds;
+	public Set<String> sectionIds;
 
-	public Course(String id, CourseType type, String teacherId, String sectionId) {
+	public Course(String id, CourseType type, Set<String> teacherIds, Set<String> sectionIds) {
 		this.id = id;
 		this.type = type;
-		this.teacherId = teacherId;
-		this.sectionId = sectionId;
-//		this.students = students;
+		this.teacherIds = teacherIds;
+		this.sectionIds = sectionIds;
 	}
 }
