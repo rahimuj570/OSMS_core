@@ -24,12 +24,22 @@ public class CSPState {
 		this.sections = sections;
 
 		for (String t : teachers.keySet())
-			teacherOccupied.put(t, new long[5]);
+			teacherOccupied.put(t, new long[7]);
 
 		for (String r : rooms.keySet())
-			roomOccupied.put(r, new long[5]);
+			roomOccupied.put(r, new long[7]);
 
 		for (String s : sections.keySet())
-			sectionOccupied.put(s, new long[5]);
+			sectionOccupied.put(s, new long[7]);
 	}
+
+	public void clearOccupations() {
+		for (long[] arr : teacherOccupied.values())
+			Arrays.fill(arr, 0L);
+		for (long[] arr : roomOccupied.values())
+			Arrays.fill(arr, 0L);
+		for (long[] arr : sectionOccupied.values())
+			Arrays.fill(arr, 0L);
+	}
+
 }

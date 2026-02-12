@@ -10,46 +10,46 @@ import java.util.*;
 
 public class RoutinePrinter {
 
-    private static final String[] DAYS = {
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
-    };
+	private static final String[] DAYS = { "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+			"Friday" };
 
-    public static void print(CSPState state) {
+	public static void print(CSPState state) {
 
-        System.out.println("\n===== FINAL ROUTINE =====\n");
+		System.out.println("\n===== FINAL ROUTINE =====\n");
 
-        List<Variable> vars = new ArrayList<>(state.variables.values());
+		List<Variable> vars = new ArrayList<>(state.variables.values());
 
-        // Sort by day → startSlot
-        vars.sort(Comparator
-                .comparingInt((Variable v) -> v.assignedValue.day)
-                .thenComparingInt(v -> v.assignedValue.startSlot)
-        );
+		// Sort by day → startSlot
+		vars.sort(Comparator.comparingInt((Variable v) -> v.assignedValue.day)
+				.thenComparingInt(v -> v.assignedValue.startSlot));
 
-        for (Variable v : vars) {
-            Value val = v.assignedValue;
-            Course c = v.course;
-            Section s = v.section;
+		for (String cl : List.of("A", "B", "C")) {
+			
+			System.out.println("________Class "+cl+" _____\n");
 
-            String day = DAYS[val.day];
-            String time = timeRange(val.startSlot, val.slotCount);
+			for (Variable v : vars) {
+				
+				if(v.section.id!=cl) {
+					continue;
+				}
+				Value val = v.assignedValue;
+				Course c = v.course;
+				Section s = v.section;
 
-            System.out.println(
-                "Course: " + c.id +
-                " | Section: " + s.id +
-                " | Teacher: " + val.teacherId +
-                " | Room: " + val.roomId +
-                " | Day: " + day +
-                " | Time: " + time
-            );
-        }
+				String day = DAYS[val.day];
+				String time = timeRange(val.startSlot, val.slotCount);
 
-        System.out.println("\n=========================\n");
-    }
+				System.out.println("Course: " + c.id + " | Section: " + s.id + " | Teacher: " + val.teacherId
+						+ " | Room: " + val.roomId + " | Day: " + day + " | Time: " + time);
+			}
 
-    private static String timeRange(int startSlot, int slotCount) {
-        float startHour = 9 + ((float)startSlot*30)/60;
-        float endHour = startHour + ((float)slotCount*30)/60;
-        return startHour + ":00 - " + endHour + ":00";
-    }
+			System.out.println("\n=========================\n");
+		}
+	}
+
+	private static String timeRange(int startSlot, int slotCount) {
+		int startHour = 9 + (startSlot*30)/60;
+		int endHour = startHour + (slotCount * 30) / 60;
+		return startHour + ":"+(startSlot*30)%60+" - " + (endHour+":"+((startSlot*30)%60+ (slotCount*30)%60));
+	}
 }

@@ -11,19 +11,52 @@ import entity.Teacher;
 
 public class CSPSolver {
 
-	public static boolean solve(CSPState s) {
-		// If all classes assigned -> check final constraints
-		if (allAssigned(s))
-			return validateLabOriented(s) && validateLab(s);
+	private static int bestScore = Integer.MAX_VALUE;
+	private static Map<String, Value> bestAssignment = new HashMap<>();
 
-		// Select next variable to assign by MRV + Degree Heuristic
+	private static int nodes = 0;
+	private static final int MAX_NODES = 1_000_000;
+
+	public static Map<String, Value> getBestAssignment() {
+		return bestAssignment;
+	}
+
+	public static void reset() {
+		nodes = 0;
+		bestScore = Integer.MAX_VALUE;
+		bestAssignment.clear();
+	}
+
+	public static boolean solve(CSPState s) {
+
+//		if (++nodes > MAX_NODES)
+//			return true;
+
+		if (allAssigned(s)) {
+			if (
+					!validateLabOriented(s) ||
+					!validateLab(s))
+				return false;
+
+			int score = SoftConstraints.score(s);
+			if (score < bestScore) {
+				bestScore = score;
+				bestAssignment.clear();
+				for (Variable v : s.variables.values())
+					bestAssignment.put(v.id, v.assignedValue);
+			}
+			return true;
+		}
+
 		Variable v = Heuristics.selectMRVDegree(s);
+		if (v == null || v.domain.isEmpty())
+		    return false;
+
 
 		for (Value val : new ArrayList<>(v.domain)) {
 			if (consistent(s, v, val)) {
 
 				assign(s, v, val);
-
 				Map<String, List<Value>> removed = ForwardChecker.prune(s, v, val);
 
 				// recursion happens here
@@ -35,7 +68,7 @@ public class CSPSolver {
 				unassign(s, v, val);
 			}
 		}
-		return false; // backtrack
+		return false;
 	}
 
 	private static boolean allAssigned(CSPState s) {
@@ -76,6 +109,22 @@ public class CSPSolver {
 		if ((s.sectionOccupied.get(sec.id)[val.day] & val.slotMask) != 0)
 			return false;
 
+		
+		if (v.course.type == CourseType.THEORY && r.type == RoomType.LAB) return false;
+		if (v.course.type == CourseType.LAB && r.type != RoomType.LAB) return false;
+
+		
+		
+		for (Variable other : s.variables.values()) {
+			if (!other.assigned)
+				continue;
+
+			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
+					&& other.assignedValue.day == val.day) {
+				return false;
+			}
+		}
+
 		return true;
 	}
 
@@ -90,10 +139,9 @@ public class CSPSolver {
 	}
 
 	private static void unassign(CSPState s, Variable v, Value val) {
-		// Free previously reserved time
-		s.teacherOccupied.get(val.teacherId)[val.day] ^= val.slotMask;
-		s.roomOccupied.get(val.roomId)[val.day] ^= val.slotMask;
-		s.sectionOccupied.get(v.section.id)[val.day] ^= val.slotMask;
+		s.teacherOccupied.get(val.teacherId)[val.day] &= ~val.slotMask;
+		s.roomOccupied.get(val.roomId)[val.day] &= ~val.slotMask;
+		s.sectionOccupied.get(v.section.id)[val.day] &= ~val.slotMask;
 
 		v.assigned = false;
 		v.assignedValue = null;

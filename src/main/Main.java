@@ -18,8 +18,8 @@ import entity.Teacher;
 
 public class Main {
 
-	static final int DAYS = 5;
-	static final int SLOTS_PER_DAY = 16;
+	static final int DAYS = 7;
+	static final int SLOTS_PER_DAY = 14;
 
 	static List<Variable> generateVariables(List<Course> courses, Map<String, Section> sections) {
 		List<Variable> vars = new ArrayList<>();
@@ -27,7 +27,6 @@ public class Main {
 		for (Course c : courses) {
 			for (String secId : c.sectionIds) {
 				Section sec = sections.get(secId);
-
 				switch (c.type) {
 				case THEORY -> {
 					vars.add(new Variable(c.id + "_" + secId + "_1", c, sec));
@@ -124,34 +123,113 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		Teacher t1 = new Teacher("T1", Set.of("C1", "C3"), new boolean[] { true, true, true, true, false // Fri (not
-				// available)
-		});
+		long FULL_DAY = (1L << SLOTS_PER_DAY) - 1;
+		long LUNCH_MASK = ~((1L << 6) | (1L << 7));
+		long DAY_WITHOUT_LUNCH = FULL_DAY & LUNCH_MASK;
 
-		Teacher t2 = new Teacher("T2", Set.of("C2", "C3"), new boolean[] { false, true, true, true, true });
+		Room r1 = new Room("R801", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+		Room r2 = new Room("R803", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+		Room l1 = new Room("L802", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+		Room l2 = new Room("L902", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+		Room l3 = new Room("L903", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
 
-		Room r1 = new Room("R1", RoomType.THEORY, 60, new long[] { 0b1111111111111111L, 0b1111111111111111L,
-				0b1111111111111111L, 0b1111111111111111L, 0b1111111111111111L });
+		enum CN {
+			MATH, PHYSICS, PHYSICS_LAB, COMPUTER_SCIENCE, ENGLISH, HISTORY, CHEMISTRY, PROGRAMING_LAB, CHEMISTRY_LAB,
+			STATISTIC, SWE, PRESENTATION
+		}
+		enum TN {
+			RAHMAN, DAS, SULTANA, CHOWDHURY, KAFI, NOOR, ALAM, 
+		}
 
-		Room l1 = new Room("L1", RoomType.LAB, 40, new long[] { 0b0000001111111100L, // slots 2–11
-				0b0000001111111100L, 0b0000001111111100L, 0b0000001111111100L, 0b0000001111111100L });
+		Teacher t1 = new Teacher(TN.RAHMAN.name(),
+				Set.of(CN.MATH.name(),CN.COMPUTER_SCIENCE.name(),CN.HISTORY.name(),CN.PROGRAMING_LAB.name(),CN.STATISTIC.name()),
+				new boolean[] { true, true, true, true, true, true, true });
 
-		Section s1 = new Section("S1", 40);
-		Section s2 = new Section("S2", 35);
+		Teacher t2 = new Teacher(TN.DAS.name(),
+				Set.of(CN.MATH.name(),CN.HISTORY.name(),CN.PRESENTATION.name()),
+				new boolean[] { true, true, true, true, true, true, true });
+		
+		Teacher t3 = new Teacher(TN.SULTANA.name(),
+				Set.of(CN.PHYSICS.name(),CN.PHYSICS_LAB.name(),CN.STATISTIC.name()),
+				new boolean[] { true, true, true, true, true, true, true });
+		
+		Teacher t4 = new Teacher(TN.CHOWDHURY.name(),
+				Set.of(CN.PHYSICS.name(),CN.ENGLISH.name(),CN.SWE.name()),
+				new boolean[] { true, true, true, true, true, true, true });
 
-		Course c1 = new Course("C1", CourseType.THEORY, Set.of("T1"), Set.of("S1", "S2"));
+		Teacher t5 = new Teacher(TN.KAFI.name(),
+				Set.of(CN.COMPUTER_SCIENCE.name(),CN.CHEMISTRY.name(),CN.PHYSICS_LAB.name(),CN.PROGRAMING_LAB.name(),CN.SWE.name()),
+				new boolean[] { true, true, true, true, true, true, true });
 
-		Course c2 = new Course("C2", CourseType.LAB, Set.of("T2"), Set.of("S1"));
+		Teacher t6 = new Teacher(TN.NOOR.name(),
+				Set.of(CN.ENGLISH.name(),CN.CHEMISTRY_LAB.name(),CN.PRESENTATION.name()),
+				new boolean[] { true, true, true, true, true, true, true });
 
-		Course c3 = new Course("C3", CourseType.LAB_ORIENTED_THEORY, Set.of("T1", "T2"), Set.of("S2"));
+		Teacher t7 = new Teacher(TN.ALAM.name(), Set.of(CN.CHEMISTRY.name(),CN.CHEMISTRY_LAB.name()),
+				new boolean[] { true, true, true, true, true, true, true });
 
-		List<Course> courses = List.of(c1, c2, c3);
+		
 
-		Map<String, Section> sections = Map.of("S1", s1, "S2", s2);
+		Section A = new Section("A", 40);
+		Section B = new Section("B", 35);
+		Section C = new Section("C", 35);
+		
+		Course c1 = new Course(CN.MATH.name(), CourseType.THEORY,
+				Set.of(TN.RAHMAN.name(), TN.DAS.name()), Set.of(A.id, B.id));
 
-		Map<String, Teacher> teachers = Map.of("T1", t1, "T2", t2);
+		Course c2 = new Course(CN.ENGLISH.name(), CourseType.THEORY,
+				Set.of(TN.CHOWDHURY.name(), TN.NOOR.name()),
+				Set.of(A.id, B.id, C.id));
 
-		Map<String, Room> rooms = Map.of("R1", r1, "L1", l1);
+		Course c3 = new Course(CN.COMPUTER_SCIENCE.name(), CourseType.THEORY,
+				Set.of(TN.KAFI.name(), TN.RAHMAN.name()), Set.of(A.id, C.id));
+
+		Course c4 = new Course(CN.HISTORY.name(), CourseType.THEORY,
+				Set.of(TN.DAS.name(), TN.RAHMAN.name()), Set.of(A.id, B.id));
+
+		Course c5 = new Course(CN.PROGRAMING_LAB.name(), CourseType.LAB,
+				Set.of(TN.KAFI.name(), TN.RAHMAN.name()),
+				Set.of(A.id, B.id));
+		
+		Course c6 = new Course(CN.PRESENTATION.name(), CourseType.LAB_ORIENTED_THEORY,
+				Set.of(TN.NOOR.name(), TN.DAS.name()), Set.of(A.id, C.id));
+
+		Course c7 = new Course(CN.PHYSICS.name(), CourseType.THEORY,
+				Set.of(TN.SULTANA.name(), TN.CHOWDHURY.name()), Set.of(B.id, C.id));
+
+		Course c8 = new Course(CN.CHEMISTRY.name(), CourseType.THEORY,
+				Set.of(TN.ALAM.name(), TN.KAFI.name()), Set.of(B.id, C.id));
+
+		Course c9 = new Course(CN.PHYSICS_LAB.name(), CourseType.LAB,
+				Set.of(TN.SULTANA.name(), TN.KAFI.name()), Set.of(B.id, C.id));
+
+		Course c10 = new Course(CN.CHEMISTRY_LAB.name(), CourseType.LAB,
+				Set.of(TN.ALAM.name(), TN.NOOR.name()), Set.of(B.id, C.id));
+
+		Course c11 = new Course(CN.STATISTIC.name(), CourseType.LAB_ORIENTED_THEORY,
+				Set.of(TN.RAHMAN.name(), TN.SULTANA.name()), Set.of(B.id, C.id));
+
+		Course c12 = new Course(CN.SWE.name(), CourseType.LAB_ORIENTED_THEORY,
+				Set.of(TN.KAFI.name(), TN.CHOWDHURY.name()),
+				Set.of(B.id, C.id));
+
+	
+
+		List<Course> courses = List.of(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12);
+
+		Map<String, Section> sections = Map.ofEntries(Map.entry(A.id, A), Map.entry(B.id, B),
+				Map.entry(C.id, C));
+
+		Map<String, Teacher> teachers = Map.ofEntries(Map.entry(t1.id, t1), Map.entry(t2.id, t2), Map.entry(t3.id, t3),
+				Map.entry(t4.id, t4), Map.entry(t5.id, t5), Map.entry(t6.id, t6), Map.entry(t7.id, t7));
+
+		Map<String, Room> rooms = Map.of(r1.id, r1, r2.id, r2, l1.id, l1, l2.id, l2,
+				l3.id, l3);
 
 		List<Variable> vars = generateVariables(courses, sections);
 		generateDomains(vars, teachers, rooms);
@@ -161,6 +239,15 @@ public class Main {
 			System.out.println(v.id + " → domain size: " + v.domain.size());
 		}
 
+		// Debug Output
+		for (Variable v : vars) {
+			for (Value val : v.domain) {
+				if ((val.slotMask & ((1L << 6) | (1L << 7))) != 0) {
+					System.out.println("❌ Lunch violation: " + v.id);
+				}
+			}
+		}
+
 		CSPState state = new CSPState(teachers, rooms, sections);
 
 		for (Variable v : vars) {
@@ -168,7 +255,35 @@ public class Main {
 		}
 		buildNeighbors(vars);
 
+		CSPSolver.reset();
 		boolean solved = CSPSolver.solve(state);
+
+		if (!CSPSolver.getBestAssignment().isEmpty()) {
+			System.out.println("Solution FOUND");
+		} else {
+			System.out.println("NO solution exists");
+		}
+
+//		 restore best found assignment
+		if (!CSPSolver.getBestAssignment().isEmpty()) {
+
+			// clear occupation maps first
+			state.clearOccupations();
+
+			for (Variable v : state.variables.values()) {
+				v.assigned = true;
+				v.assignedValue = CSPSolver.getBestAssignment().get(v.id);
+
+				Value val = v.assignedValue;
+
+				state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
+				state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+				state.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
+			}
+
+			solved = true;
+		}
+
 		System.out.println("Solved: " + solved);
 
 		if (solved) {
