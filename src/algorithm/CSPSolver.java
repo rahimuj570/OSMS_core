@@ -43,7 +43,6 @@ public class CSPSolver {
 		if (allAssigned(s)) {
 			if (!validateLabOriented(s) || !validateLab(s))
 				return false;
-			
 
 			int score = SoftConstraints.score(s);
 			if (score < bestScore) {
@@ -54,14 +53,15 @@ public class CSPSolver {
 			}
 			return false;
 		}
-		
-		
 
 		Variable v = Heuristics.selectMRVDegree(s);
 
 		if (v == null || v.domain.isEmpty())
 			return false;
-		for (Value val : new ArrayList<>(v.domain)) {
+		
+		List<Value> values = new ArrayList<>(v.domain);
+
+		for (Value val : values){
 
 			if (!consistent(s, v, val))
 				continue;
@@ -101,8 +101,7 @@ public class CSPSolver {
 		// HARD: forbidden teacher
 		if (c.forbiddenTeachers != null && c.forbiddenTeachers.contains(val.teacherId))
 			return false;
-		
-	
+
 		if (!t.availability[val.day]) {
 			return false;
 		}
@@ -124,23 +123,29 @@ public class CSPSolver {
 
 		if (v.course.type == CourseType.THEORY && r.type == RoomType.LAB)
 			return false;
-		if (v.course.type == CourseType.LAB && r.type != RoomType.LAB)
-			return false;
 
-		for (Variable other : s.variables.values()) {
-			if (!other.assigned)
-				continue;
+		if (v.course.type == CourseType.LAB) {
+			if (r.type != RoomType.LAB)
+				return false;
 
+			if (r.labType == null || v.course.requiredLab != r.labType)
+				return false;
+		}
+
+//		for (Variable other : s.variables.values()) {
+//			if (!other.assigned)
+//				continue;
+//
+////			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
+////					&& other.assignedValue.day == val.day) {
+////				return false;
+////			}
+//			// allow same day, but not overlapping
 //			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
-//					&& other.assignedValue.day == val.day) {
+//					&& other.assignedValue.day == val.day && (other.assignedValue.slotMask & val.slotMask) != 0) {
 //				return false;
 //			}
-			// allow same day, but not overlapping
-			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
-					&& other.assignedValue.day == val.day && (other.assignedValue.slotMask & val.slotMask) != 0) {
-				return false;
-			}
-		}
+//		}
 
 		return true;
 	}

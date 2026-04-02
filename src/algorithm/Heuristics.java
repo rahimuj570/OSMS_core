@@ -22,4 +22,5 @@ public class Heuristics {
 		}
 		return best;
 	}
+	
 }

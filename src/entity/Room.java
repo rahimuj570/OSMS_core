@@ -5,13 +5,13 @@ public class Room {
 	public RoomType type;
 	public int capacity;
 	public long[] availability;
-//	public LabType labType;
+	public LabType labType=null;
 
-	public Room(String id, RoomType type, int capacity, long[] availability) {
+	public Room(String id, RoomType type, int capacity, long[] availability, LabType labType) {
 		this.id = id;
 		this.type = type;
 		this.capacity = capacity;
 		this.availability = availability;
-//		this.labType = labType;
+		this.labType = labType;
 	}
 }

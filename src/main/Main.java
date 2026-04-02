@@ -11,6 +11,7 @@ import algorithm.Value;
 import algorithm.Variable;
 import entity.Course;
 import entity.CourseType;
+import entity.LabType;
 import entity.Room;
 import entity.RoomType;
 import entity.Section;
@@ -73,6 +74,16 @@ public class Main {
 						if (!roomAllowed(v.course.type, r))
 							continue;
 
+						if (v.course.type == CourseType.LAB) {
+							if (r.type != RoomType.LAB)
+								continue;
+							if (r.labType != v.course.requiredLab)
+								continue;
+						}
+
+						if (v.course.type == CourseType.THEORY && r.type == RoomType.LAB)
+							continue;
+
 						if (r.capacity < v.section.students)
 							continue;
 
@@ -133,32 +144,40 @@ public class Main {
 		long DAY_WITHOUT_LUNCH = FULL_DAY & LUNCH_MASK;
 
 		Room r1 = new Room("R801", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r2 = new Room("R803", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r3 = new Room("R804", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r4 = new Room("R1502", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r5 = new Room("R1702", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r6 = new Room("R1704", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r7 = new Room("R8011", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 		Room r8 = new Room("R8012", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
+		Room r9 = new Room("R80123", RoomType.THEORY, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH }, null);
 
-		Room l1 = new Room("L802", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+		Room l1 = new Room(
+				"L802", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
+						DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH },
+				LabType.ELECTRONIC);
 		Room l2 = new Room("L902", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH },
+				LabType.GENERAL);
 		Room l3 = new Room("L903", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH },
+				LabType.COMPUTER);
 		Room l4 = new Room("L1503", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH },
+				LabType.COMPUTER);
 		Room l5 = new Room("R1703", RoomType.LAB, 60, new long[] { DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH,
-				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH });
+				DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH, DAY_WITHOUT_LUNCH },
+				LabType.COMPUTER);
 
 		enum CN {
 			CSE_1203_DISCRETE_MATHEMATICS, // CSE 1203-0611 Discrete Mathematics
@@ -340,153 +359,160 @@ public class Main {
 
 		// Batch 18 (Freshman level) - Introductory courses
 		Course c1 = new Course(CN.CSE_1213_STRUCTURED_PROGRAMMING_LANGUAGE.name(), CourseType.THEORY,
-				Set.of(TN.MD_AHSAN_ARIF.name(), TN.SADIA_NUR_NAZIFA.name()), Set.of(s18A.id, s18B.id), Set.of());
+				Set.of(TN.MD_AHSAN_ARIF.name(), TN.SADIA_NUR_NAZIFA.name()), Set.of(s18A.id, s18B.id), Set.of(), null);
 
 		Course c2 = new Course(CN.CSE_1214_STRUCTURED_PROGRAMMING_LANGUAGE_LAB.name(), CourseType.LAB,
 				Set.of(TN.SYEDA_TASFIA.name(), TN.SADIA_NUR_NAZIFA.name(), TN.MD_AHSAN_ARIF.name()),
-				Set.of(s18A.id, s18B.id), Set.of());
+				Set.of(s18A.id, s18B.id), Set.of(), LabType.COMPUTER);
 
 		Course c3 = new Course(CN.CSE_2141_OBJECT_ORIENTED_PROGRAMMING_LANGUAGE.name(), CourseType.THEORY,
-				Set.of(TN.ASHIF_MAHMUD_JOY.name(), TN.H_M_IKRAM_KAYS.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.ASHIF_MAHMUD_JOY.name(), TN.H_M_IKRAM_KAYS.name()), Set.of(s17A.id, s17B.id), Set.of(), null);
 
 		Course c4 = new Course(CN.CSE_2142_OBJECT_ORIENTED_PROGRAMMING_LANGUAGE_LAB.name(), CourseType.LAB,
-				Set.of(TN.ASHIF_MAHMUD_JOY.name(), TN.H_M_IKRAM_KAYS.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.ASHIF_MAHMUD_JOY.name(), TN.H_M_IKRAM_KAYS.name()), Set.of(s17A.id, s17B.id), Set.of(), LabType.COMPUTER);
 
 		Course c5 = new Course(
 				CN.CSE_1203_DISCRETE_MATHEMATICS.name(), CourseType.THEORY, Set.of(TN.SYEDA_TASFIA.name(),
 						TN.H_M_IKRAM_KAYS.name(), TN.TUHIN_HOSSAIN.name(), TN.SUMITRA_GHOSH.name()),
-				Set.of(s17A.id, s17B.id, s16A.id, s16B.id), Set.of());
+				Set.of(s17A.id, s17B.id, s16A.id, s16B.id), Set.of(), null);
 
 		Course c6 = new Course(CN.CSE_2105_COMPETITIVE_PROGRAMMING_I.name(), CourseType.THEORY,
-				Set.of(TN.SADIA_NUR_NAZIFA.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.SADIA_NUR_NAZIFA.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s17A.id, s17B.id), Set.of(),
+				null);
 
 		Course c7 = new Course(CN.CSE_3223_DATABASE_MANAGEMENT_SYSTEM.name(), CourseType.THEORY,
-				Set.of(TN.ARPITA_ROY.name(), TN.MD_AHSAN_ARIF.name()), Set.of(s16A.id, s16B.id), Set.of());
+				Set.of(TN.ARPITA_ROY.name(), TN.MD_AHSAN_ARIF.name()), Set.of(s16A.id, s16B.id), Set.of(), null);
 
 		Course c8 = new Course(CN.CSE_3224_DATABASE_MANAGEMENT_SYSTEM_LAB.name(), CourseType.LAB,
-				Set.of(TN.ARPITA_ROY.name(), TN.MD_AHSAN_ARIF.name()), Set.of(s16A.id, s16B.id), Set.of());
+				Set.of(TN.ARPITA_ROY.name(), TN.MD_AHSAN_ARIF.name()), Set.of(s16A.id, s16B.id), Set.of(), LabType.COMPUTER);
 
-		Course c9 = new Course(CN.CSE_2144_ENGINEERING_DRAWING.name(), CourseType.THEORY,
-				Set.of(TN.TUHIN_HOSSAIN.name(), TN.SABIKUN_NAHAR_ZERIN.name()), Set.of(s16A.id, s16B.id), Set.of());
+		Course c9 = new Course(CN.CSE_2144_ENGINEERING_DRAWING.name(), CourseType.LAB_ORIENTED_THEORY,
+				Set.of(TN.TUHIN_HOSSAIN.name(), TN.SABIKUN_NAHAR_ZERIN.name()), Set.of(s16A.id, s16B.id), Set.of(),
+				LabType.COMPUTER);
 
 		Course c10 = new Course(CN.CSE_2215_DATA_STRUCTURES_AND_ALGORITHMS.name(), CourseType.THEORY,
 				Set.of(TN.SHAILA_SHARMIN.name(), TN.SABIKUN_NAHAR_ZERIN.name()), Set.of(s15A.id, s15B.id, s15C.id),
-				Set.of());
+				Set.of(), null);
 
 		Course c11 = new Course(CN.CSE_2216_DATA_STRUCTURES_AND_ALGORITHMS_LAB.name(), CourseType.LAB,
-				Set.of(TN.SHAILA_SHARMIN.name(), TN.SYEDA_TASFIA.name()), Set.of(s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(TN.SHAILA_SHARMIN.name(), TN.SYEDA_TASFIA.name()), Set.of(s15A.id, s15B.id, s15C.id), Set.of(),
+				LabType.COMPUTER);
 
 		Course c12 = new Course(CN.CSE_2221_SYSTEM_ANALYSIS_AND_DESIGN.name(), CourseType.THEORY,
 				Set.of(TN.TUHIN_HOSSAIN.name(), TN.SADIA_NUR_NAZIFA.name(), TN.SYEDA_TASFIA.name()),
-				Set.of(s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(s15A.id, s15B.id, s15C.id), Set.of(), null);
 
 		Course c13 = new Course(CN.CSE_2222_SYSTEM_ANALYSIS_AND_DESIGN_LAB.name(), CourseType.LAB,
 				Set.of(TN.TUHIN_HOSSAIN.name(), TN.SADIA_NUR_NAZIFA.name(), TN.SYEDA_TASFIA.name()),
-				Set.of(s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(s15A.id, s15B.id, s15C.id), Set.of(), LabType.COMPUTER);
 
 		Course c14 = new Course(CN.CSE_2234_NUMERICAL_ANALYSIS_WITH_MATLAB.name(), CourseType.THEORY,
 				Set.of(TN.H_M_IKRAM_KAYS.name(), TN.SABIKUN_NAHAR_ZERIN.name(), TN.TUHIN_HOSSAIN.name()),
-				Set.of(s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(s15A.id, s15B.id, s15C.id), Set.of(), null);
 
 		Course c15 = new Course(CN.CSE_3151_DIGITAL_LOGIC_DESIGN.name(), CourseType.THEORY,
-				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s14A.id, s14B.id), Set.of(),
+				null);
 
 		Course c16 = new Course(CN.CSE_3152_DIGITAL_LOGIC_DESIGN_LAB.name(), CourseType.LAB,
-				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.MAHBUB_E_SOBHANI.name()), Set.of(s14A.id, s14B.id), Set.of(),
+				LabType.COMPUTER);
 
 		Course c17 = new Course(CN.CSE_3253_MICROPROCESSOR_AND_ASSEMBLY_LANGUAGE.name(), CourseType.THEORY,
-				Set.of(TN.MD_NURUL_ISLAM.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.MD_NURUL_ISLAM.name()), Set.of(s14A.id, s14B.id), Set.of(), null);
 
 		Course c18 = new Course(CN.CSE_3254_MICROPROCESSOR_AND_ASSEMBLY_LANGUAGE_LAB.name(), CourseType.LAB,
-				Set.of(TN.MD_NURUL_ISLAM.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.MD_NURUL_ISLAM.name()), Set.of(s14A.id, s14B.id), Set.of(), LabType.COMPUTER);
 
 		Course c19 = new Course(CN.CSE_2205_COMPETITIVE_PROGRAMMING_II.name(), CourseType.THEORY,
 				Set.of(TN.MAHBUB_E_SOBHANI.name(), TN.SHAILA_SHARMIN.name()),
-				Set.of(s14A.id, s14B.id, s16A.id, s16B.id), Set.of());
+				Set.of(s14A.id, s14B.id, s16A.id, s16B.id), Set.of(), null);
 
 		Course c20 = new Course(CN.CSE_3219_COMPILER_CONSTRUCTION.name(), CourseType.THEORY,
-				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.ARPITA_ROY.name()), Set.of(s13A.id, s13B.id), Set.of());
+				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.ARPITA_ROY.name()), Set.of(s13A.id, s13B.id), Set.of(), null);
 
 		Course c21 = new Course(CN.CSE_3220_COMPILER_CONSTRUCTION_LAB.name(), CourseType.LAB,
-				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.ARPITA_ROY.name()), Set.of(s13A.id, s13B.id), Set.of());
+				Set.of(TN.REDUANUL_BARI_SHUVON.name(), TN.ARPITA_ROY.name()), Set.of(s13A.id, s13B.id), Set.of(), LabType.COMPUTER);
 
 		Course c22 = new Course(CN.CSE_3246_WEB_PROGRAMMING.name(), CourseType.THEORY,
-				Set.of(TN.MD_NURUL_ISLAM.name(), TN.ASHIF_MAHMUD_JOY.name()), Set.of(s13A.id, s13B.id), Set.of());
+				Set.of(TN.MD_NURUL_ISLAM.name(), TN.ASHIF_MAHMUD_JOY.name()), Set.of(s13A.id, s13B.id), Set.of(), null);
 
 		Course c23 = new Course(CN.CSE_3132_DATA_COMMUNICATION_AND_NETWORKING.name(), CourseType.THEORY,
-				Set.of(TN.A_K_M_MONZURUL_ISLAM.name(), TN.MAHBUBUR_RAHMAN.name()), Set.of(s13A.id, s13B.id), Set.of());
+				Set.of(TN.A_K_M_MONZURUL_ISLAM.name(), TN.MAHBUBUR_RAHMAN.name()), Set.of(s13A.id, s13B.id), Set.of(),
+				null);
 
 		Course c24 = new Course(CN.CSE_3132_DATA_COMMUNICATION_AND_NETWORKING_LAB.name(), CourseType.LAB,
-				Set.of(TN.A_K_M_MONZURUL_ISLAM.name(), TN.MAHBUBUR_RAHMAN.name()), Set.of(s13A.id, s13B.id), Set.of());
+				Set.of(TN.A_K_M_MONZURUL_ISLAM.name(), TN.MAHBUBUR_RAHMAN.name()), Set.of(s13A.id, s13B.id), Set.of(),
+				LabType.COMPUTER);
 
 		Course c25 = new Course(CN.CSE_4229_ARTIFICIAL_INTELLIGENCE.name(), CourseType.THEORY,
 				Set.of(TN.DR_SAIFUL_ISLAM.name(), TN.REDUANUL_BARI_SHUVON.name(), TN.MAMOON_AL_RASHEED.name()),
-				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of());
+				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of(), null);
 
 		Course c26 = new Course(CN.CSE_4230_ARTIFICIAL_INTELLIGENCE_LAB.name(), CourseType.LAB,
 				Set.of(TN.DR_SAIFUL_ISLAM.name(), TN.REDUANUL_BARI_SHUVON.name(), TN.MAMOON_AL_RASHEED.name()),
-				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of());
+				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of(), LabType.COMPUTER);
 
 		Course c27 = new Course(CN.CSE_4201_DATA_MINING_AND_MACHINE_LEARNING.name(), CourseType.THEORY,
-				Set.of(TN.ASHIF_MAHMUD_JOY.name()), Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of());
+				Set.of(TN.ASHIF_MAHMUD_JOY.name()), Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of(), null);
 
 		Course c28 = new Course(CN.CSE_4137_OPERATING_SYSTEM.name(), CourseType.THEORY,
 				Set.of(TN.SABIKUN_NAHAR_ZERIN.name(), TN.H_M_IKRAM_KAYS.name(), TN.MAHBUBUR_RAHMAN.name(),
 						TN.A_K_M_MONZURUL_ISLAM.name()),
-				Set.of(s11_12A.id, s11_12B.id, s11_12C.id, s13A.id, s13B.id), Set.of());
+				Set.of(s11_12A.id, s11_12B.id, s11_12C.id, s13A.id, s13B.id), Set.of(), null);
 
 		Course c29 = new Course(CN.CSE_4138_OPERATING_SYSTEM_LAB.name(), CourseType.LAB,
 				Set.of(TN.SABIKUN_NAHAR_ZERIN.name(), TN.MAHBUBUR_RAHMAN.name()),
-				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of());
+				Set.of(s11_12A.id, s11_12B.id, s11_12C.id), Set.of(), LabType.COMPUTER);
 
 		Course c30 = new Course(CN.CSE_4135_CYBER_SECURITY_AND_LAW.name(), CourseType.THEORY,
 				Set.of(TN.SHAILA_SHARMIN.name(), TN.MAHBUBUR_RAHMAN.name()), Set.of(s11_12A.id, s11_12B.id, s11_12C.id),
-				Set.of());
+				Set.of(), null);
 
 		Course c31 = new Course(CN.MATH_2217_MATH_IV_PROBABILITY_AND_STATISTICS.name(), CourseType.THEORY,
 				Set.of(TN.NUR_MUHAMMAD_FAHAD.name(), TN.MD_RAHAD_ISLAM_BHUIYAN.name()),
-				Set.of(s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(s15A.id, s15B.id, s15C.id), Set.of(), null);
 
 		Course c32 = new Course(CN.GED_3115_PRINCIPLE_OF_ACCOUNTING.name(), CourseType.THEORY,
 				Set.of(TN.SUMITRA_GHOSH.name(), TN.SAMIA_SABAH.name()),
-				Set.of(s13A.id, s13B.id, s14A.id, s14B.id, s15A.id, s15B.id, s15C.id), Set.of());
+				Set.of(s13A.id, s13B.id, s14A.id, s14B.id, s15A.id, s15B.id, s15C.id), Set.of(), null);
 
 		Course c33 = new Course(CN.MATH_1111_MATHEMATICS_I.name(), CourseType.THEORY,
-				Set.of(TN.ABU_SUFIAN_MD_SHAHED.name()), Set.of(s18A.id, s18B.id), Set.of());
+				Set.of(TN.ABU_SUFIAN_MD_SHAHED.name()), Set.of(s18A.id, s18B.id), Set.of(), null);
 
 		Course c34 = new Course(CN.MATH_1213_MATHEMATICS_II.name(), CourseType.THEORY,
-				Set.of(TN.ASIB_MUSTAKIM_FONY.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.ASIB_MUSTAKIM_FONY.name()), Set.of(s17A.id, s17B.id), Set.of(), null);
 
 		Course c35 = new Course(CN.MATH_2115_MATHEMATICS_III.name(), CourseType.THEORY,
-				Set.of(TN.ASIB_MUSTAKIM_FONY.name(), TN.DR_ROWSANARA_AKHTER.name()), Set.of(s16A.id, s16B.id),
-				Set.of());
+				Set.of(TN.ASIB_MUSTAKIM_FONY.name(), TN.DR_ROWSANARA_AKHTER.name()), Set.of(s16A.id, s16B.id), Set.of(),
+				null);
 
 		Course c36 = new Course(CN.HUM_1111_ORGANIZATIONAL_BEHAVIOR.name(), CourseType.THEORY,
-				Set.of(TN.A_K_M_MONZURUL_ISLAM.name()), Set.of(s16A.id, s16B.id), Set.of());
+				Set.of(TN.A_K_M_MONZURUL_ISLAM.name()), Set.of(s16A.id, s16B.id), Set.of(), null);
 
 		Course c37 = new Course(CN.HUM_1113_BANGLADESH_STUDIES.name(), CourseType.THEORY, Set.of(TN.ARPITA_ROY.name()),
-				Set.of(s18A.id, s18B.id), Set.of());
+				Set.of(s18A.id, s18B.id), Set.of(), null);
 
 		Course c38 = new Course(CN.HUM_2125_ARTS_OF_PRESENTATION.name(), CourseType.THEORY,
-				Set.of(TN.MAMOON_AL_RASHEED.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.MAMOON_AL_RASHEED.name()), Set.of(s17A.id, s17B.id), Set.of(), null);
 
 		Course c39 = new Course(CN.ENG_1213_COMMUNICATIVE_ENGLISH.name(), CourseType.THEORY,
-				Set.of(TN.SHAILA_SHARMIN.name()), Set.of(s17A.id, s17B.id), Set.of());
+				Set.of(TN.SHAILA_SHARMIN.name()), Set.of(s17A.id, s17B.id), Set.of(), null);
 
-		Course c40 = new Course(CN.PHY_1111_PHYSICS_PLUS_LAB.name(), CourseType.THEORY,
-				Set.of(TN.SM_MONIRUZZAMAN.name()), Set.of(s18A.id, s18B.id), Set.of());
+		Course c40 = new Course(CN.PHY_1111_PHYSICS_PLUS_LAB.name(), CourseType.LAB_ORIENTED_THEORY,
+				Set.of(TN.SM_MONIRUZZAMAN.name()), Set.of(s18A.id, s18B.id), Set.of(), LabType.GENERAL);
 
 		Course c41 = new Course(CN.CHE_1111_CHEMISTRY.name(), CourseType.THEORY,
-				Set.of(TN.SALEHIN_MAHBUB.name(), TN.MD_NAHID.name()), Set.of(s18A.id, s18B.id), Set.of());
+				Set.of(TN.SALEHIN_MAHBUB.name(), TN.MD_NAHID.name()), Set.of(s18A.id, s18B.id), Set.of(), null);
 
 		Course c42 = new Course(CN.CHE_1112_CHEMISTRY_LAB.name(), CourseType.LAB, Set.of(TN.SALEHIN_MAHBUB.name()),
-				Set.of(s18A.id), Set.of());
+				Set.of(s18A.id), Set.of(), LabType.GENERAL);
 
 		Course c43 = new Course(CN.EEE_1211_ELECTRICAL_CIRCUIT_ANALYSIS.name(), CourseType.THEORY,
-				Set.of(TN.NUR_MUHAMMAD_FAHAD.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.NUR_MUHAMMAD_FAHAD.name()), Set.of(s14A.id, s14B.id), Set.of(), null);
 
 		Course c44 = new Course(CN.EEE_1212_ELECTRICAL_CIRCUIT_ANALYSIS_LAB.name(), CourseType.LAB,
-				Set.of(TN.NUR_MUHAMMAD_FAHAD.name()), Set.of(s14A.id, s14B.id), Set.of());
+				Set.of(TN.NUR_MUHAMMAD_FAHAD.name()), Set.of(s14A.id, s14B.id), Set.of(), LabType.ELECTRONIC);
 
 		List<Course> courses = List.of(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18,
 				c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37, c38, c39,
@@ -510,8 +536,7 @@ public class Main {
 				Map.entry(r4.id, r4), Map.entry(r5.id, r5), Map.entry(l1.id, l1), Map.entry(l2.id, l2),
 				Map.entry(l3.id, l3), Map.entry(l4.id, l4), Map.entry(l5.id, l5)
 
-				, Map.entry(r6.id, r6), Map.entry(r7.id, r7)
-				, Map.entry(r8.id, r8)
+				, Map.entry(r6.id, r6), Map.entry(r7.id, r7), Map.entry(r8.id, r8), Map.entry(r9.id, r9)
 
 		);
 
@@ -553,6 +578,7 @@ public class Main {
 		int countUnassignedTheory = 0;
 		int countUnassignedLab = 0;
 		int countUnasignedLabOrientedTheory = 0;
+		ArrayList<String>unassigedVarId=new ArrayList<String>();
 		for (var a : state.variables.values()) {
 			if (a.assigned) {
 				countAssigned++;
@@ -565,6 +591,7 @@ public class Main {
 				} else {
 					countUnasignedLabOrientedTheory++;
 				}
+				unassigedVarId.add(a.id);
 			}
 		}
 
@@ -599,6 +626,9 @@ public class Main {
 			System.out.println("Total Unassigned Lab Variable= " + countUnassignedLab);
 			System.out.println("Total Unassigned Theory Variable= " + countUnassignedTheory);
 			System.out.println("Total Unassigned Lab_oriented_theory Variable= " + countUnasignedLabOrientedTheory);
+			for( var id : unassigedVarId) {
+				System.out.println(id);
+			}
 
 		} else {
 			System.out.println("⚠️ Timeout reached — best found solution used");
