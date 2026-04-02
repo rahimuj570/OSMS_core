@@ -41,5 +41,51 @@ public class CSPState {
 		for (long[] arr : sectionOccupied.values())
 			Arrays.fill(arr, 0L);
 	}
+	
+	
+	
+	
+	public CSPState deepCopy() {
+
+	    CSPState copy = new CSPState(
+	            this.teachers,
+	            new HashMap<>(this.rooms),
+	            this.sections
+	    );
+
+	    // copy variables
+	    for (Variable v : this.variables.values()) {
+	        Variable nv = new Variable(v.id, v.course, v.section);
+
+	        // deep copy domain
+	        nv.domain = new ArrayList<>();
+	        for (Value val : v.domain) {
+	            nv.domain.add(new Value(
+	                    val.day,
+	                    val.startSlot,
+	                    val.slotCount,
+	                    val.roomId,
+	                    val.teacherId
+	            ));
+	        }
+
+	        copy.variables.put(nv.id, nv);
+	    }
+
+	    // copy occupied arrays
+	    copy.teacherOccupied = cloneOccupied(this.teacherOccupied);
+	    copy.roomOccupied = cloneOccupied(this.roomOccupied);
+	    copy.sectionOccupied = cloneOccupied(this.sectionOccupied);
+
+	    return copy;
+	}
+
+	private Map<String, long[]> cloneOccupied(Map<String, long[]> original) {
+	    Map<String, long[]> copy = new HashMap<>();
+	    for (Map.Entry<String, long[]> e : original.entrySet()) {
+	        copy.put(e.getKey(), Arrays.copyOf(e.getValue(), 7));
+	    }
+	    return copy;
+	}
 
 }

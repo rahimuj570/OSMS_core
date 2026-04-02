@@ -1,15 +1,12 @@
 package entity;
 
-import java.util.Set;
 
 public class Teacher {
 	public String id;
-	public Set<String> qualifiedCourseIds;
 	public boolean[] availability;
 
-	public Teacher(String id, Set<String> qualifiedCourseIds, boolean[] availability) {
+	public Teacher(String id, boolean[] availability) {
 		this.id = id;
-		this.qualifiedCourseIds = qualifiedCourseIds;
 		this.availability = availability;
 	}
 }

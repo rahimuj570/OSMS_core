@@ -8,6 +8,7 @@ import entity.Room;
 import entity.RoomType;
 import entity.Section;
 import entity.Teacher;
+import main.Main;
 
 public class CSPSolver {
 
@@ -22,6 +23,7 @@ public class CSPSolver {
 	}
 
 	public static void reset() {
+		Main.timeout = false;
 		nodes = 0;
 		bestScore = Integer.MAX_VALUE;
 		bestAssignment.clear();
@@ -29,14 +31,19 @@ public class CSPSolver {
 
 	public static boolean solve(CSPState s) {
 
-//		if (++nodes > MAX_NODES)
-//			return true;
+		if (++nodes > MAX_NODES) {
+			Main.timeout = true;
+			return true;
+		}
+
+		if (nodes % 200_000 == 0) {
+			System.out.println("Visited nodes: " + nodes);
+		}
 
 		if (allAssigned(s)) {
-			if (
-					!validateLabOriented(s) ||
-					!validateLab(s))
+			if (!validateLabOriented(s) || !validateLab(s))
 				return false;
+			
 
 			int score = SoftConstraints.score(s);
 			if (score < bestScore) {
@@ -45,28 +52,35 @@ public class CSPSolver {
 				for (Variable v : s.variables.values())
 					bestAssignment.put(v.id, v.assignedValue);
 			}
-			return true;
+			return false;
 		}
+		
+		
 
 		Variable v = Heuristics.selectMRVDegree(s);
+
 		if (v == null || v.domain.isEmpty())
-		    return false;
-
-
+			return false;
 		for (Value val : new ArrayList<>(v.domain)) {
-			if (consistent(s, v, val)) {
 
-				assign(s, v, val);
-				Map<String, List<Value>> removed = ForwardChecker.prune(s, v, val);
+			if (!consistent(s, v, val))
+				continue;
 
-				// recursion happens here
-				if (removed != null && solve(s))
-					return true;
+			assign(s, v, val);
 
-				// rollback changes
+			Map<String, List<Value>> removed = ForwardChecker.prune(s, v, val);
+
+			if (removed != null) {
+
+				boolean result = solve(s);
+
 				ForwardChecker.restore(s, removed);
-				unassign(s, v, val);
+
+				if (result)
+					return true;
 			}
+
+			unassign(s, v, val);
 		}
 		return false;
 	}
@@ -84,12 +98,11 @@ public class CSPSolver {
 		Room r = s.rooms.get(val.roomId);
 		Section sec = s.sections.get(v.section.id);
 
-		// Teacher must be qualified
-		if (!c.teacherIds.contains(val.teacherId))
+		// HARD: forbidden teacher
+		if (c.forbiddenTeachers != null && c.forbiddenTeachers.contains(val.teacherId))
 			return false;
-		if (!t.qualifiedCourseIds.contains(c.id))
-			return false;
-
+		
+	
 		if (!t.availability[val.day]) {
 			return false;
 		}
@@ -109,18 +122,22 @@ public class CSPSolver {
 		if ((s.sectionOccupied.get(sec.id)[val.day] & val.slotMask) != 0)
 			return false;
 
-		
-		if (v.course.type == CourseType.THEORY && r.type == RoomType.LAB) return false;
-		if (v.course.type == CourseType.LAB && r.type != RoomType.LAB) return false;
+		if (v.course.type == CourseType.THEORY && r.type == RoomType.LAB)
+			return false;
+		if (v.course.type == CourseType.LAB && r.type != RoomType.LAB)
+			return false;
 
-		
-		
 		for (Variable other : s.variables.values()) {
 			if (!other.assigned)
 				continue;
 
+//			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
+//					&& other.assignedValue.day == val.day) {
+//				return false;
+//			}
+			// allow same day, but not overlapping
 			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
-					&& other.assignedValue.day == val.day) {
+					&& other.assignedValue.day == val.day && (other.assignedValue.slotMask & val.slotMask) != 0) {
 				return false;
 			}
 		}

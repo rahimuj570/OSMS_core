@@ -20,6 +20,7 @@ public class ForwardChecker {
 					it.remove();
 				}
 			}
+			
 			if (n.domain.isEmpty())
 				return null;
 		}

@@ -23,7 +23,8 @@ public class RoutinePrinter {
 		vars.sort(Comparator.comparingInt((Variable v) -> v.assignedValue.day)
 				.thenComparingInt(v -> v.assignedValue.startSlot));
 
-		for (String cl : List.of("A", "B", "C")) {
+//		for (String cl : List.of("A", "B", "C")) {
+		state.sections.forEach((cl, u) -> {
 			
 			System.out.println("________Class "+cl+" _____\n");
 
@@ -44,7 +45,7 @@ public class RoutinePrinter {
 			}
 
 			System.out.println("\n=========================\n");
-		}
+		});
 	}
 
 	private static String timeRange(int startSlot, int slotCount) {
