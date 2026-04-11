@@ -1,0 +1,171 @@
+@charset "UTF-8";
+/* Reset */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: Arial, sans-serif;
+	background-color: #fff;
+	color: #333;
+}
+
+/* Navbar */
+.navbar {
+	background-color: #5c0931;
+	color: white;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px 20px;
+}
+
+.logo {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.nav-links {
+	list-style: none;
+	display: flex;
+}
+
+.nav-links li {
+	margin-left: 20px;
+}
+
+.nav-links a {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.nav-links a:hover {
+	text-decoration: underline;
+}
+
+.menu-toggle {
+	display: none;
+	font-size: 1.8rem;
+	cursor: pointer;
+}
+
+/* Main Content */
+main {
+	padding: 20px;
+}
+
+h1 {
+	color: #5c0931;
+	margin-bottom: 20px;
+}
+
+.add-btn {
+	background-color: #5c0931;
+	color: white;
+	border: none;
+	padding: 10px 15px;
+	border-radius: 4px;
+	cursor: pointer;
+	margin-bottom: 20px;
+}
+
+.add-btn:hover {
+	background-color: #7a1145;
+}
+
+/* Table */
+.data-table {
+	width: 100%;
+	border-collapse: collapse;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th, .data-table td {
+	border: 1px solid #ddd;
+	padding: 12px;
+	text-align: center;
+}
+
+.data-table th {
+	background-color: #5c0931;
+	color: white;
+}
+
+.data-table tr:nth-child(even) {
+	background-color: #f9f9f9;
+}
+
+.data-table tr:hover {
+	background-color: #f1f1f1;
+}
+
+/* Responsive Navbar */
+@media ( max-width : 768px) {
+	.nav-links {
+		display: none;
+		flex-direction: column;
+		background-color: #5c0931;
+		position: absolute;
+		top: 60px;
+		right: 0;
+		width: 200px;
+	}
+	.nav-links li {
+		margin: 15px 0;
+		text-align: center;
+	}
+	.menu-toggle {
+		display: block;
+	}
+	.nav-links.active {
+		display: flex;
+	}
+}
+
+button {
+	padding: 5px 15px;
+	background: #5c0931;
+	color: white;
+	border-radius: 10px
+}
+
+table {
+	overflow-x: auto;
+	display: block;
+}
+
+.error_p {
+	padding: 10px 0px;
+	color: red;
+	font-weight: bold;
+}
+
+table {
+	max-height: 100vh;
+}
+
+.notify_true {
+	background: green;
+	color: white;
+	padding: 5px;
+	border-radius: 5px;
+	text-align: center;
+}
+
+.notify_false {
+	background: red;
+	color: white;
+	padding: 5px;
+	border-radius: 5px;
+	text-align: center;
+}
+
+.slot label:not(:first-child) {
+	background: #b00fc726;
+	border-radius: 5px;
+	padding: 5px 10px;
+	margin: 3px;
+}
