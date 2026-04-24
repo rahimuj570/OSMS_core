@@ -16,6 +16,8 @@ public class CSPState {
 	public Map<Integer, long[]> teacherOccupied = new HashMap<>();
 	public Map<String, long[]> roomOccupied = new HashMap<>();
 	public Map<String, long[]> sectionOccupied = new HashMap<>();
+	
+	public Map<String, Integer> courseSectionTeacher = new HashMap<>();
 
 	public CSPState(Map<Integer, Teacher> teachers, Map<String, Room> rooms, Map<String, Section> sections) {
 

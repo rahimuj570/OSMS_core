@@ -129,7 +129,7 @@
 
 						<div class="mb-3">
 							<label for="editSectionName" class="form-label">Section
-								Name</label> <input type="text" class="form-control"
+								Name</label> <input readonly="readonly" type="text" class="form-control"
 								id="editSectionName" name="editSectionName" required>
 						</div>
 

@@ -547,7 +547,7 @@ String slotsString = sb.toString();
 
 						<div class="modal-footer">
 							<button type="submit" class="btn btn-success">Save
-								Section</button>
+								Room</button>
 							<button type="button" class="btn btn-secondary"
 								data-bs-dismiss="modal">Cancel</button>
 						</div>
@@ -563,10 +563,11 @@ String slotsString = sb.toString();
 <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header bg-maroon text-white">
-        <h5 class="modal-title" id="editRoomLabel">Edit Room</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header">
+					<h5 class="modal-title" id="addTeacherModalLabel">Edit Room (<small id="editRoomTitleId"></small>)</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
       <div class="modal-body">
         <form action="<%=request.getContextPath() %>/EditRoomServlet" method="post">
           <input type="hidden" id="editRoomId" name="roomId">
@@ -679,6 +680,8 @@ String slotsString = sb.toString();
 <script>
   const editRoomModal = document.getElementById('editRoomModal');
   editRoomModal.addEventListener('show.bs.modal', event => {
+	  
+	  
 	    const button = event.relatedTarget;
 	    
 	    const roomId = button.getAttribute('data-roomid');
@@ -686,6 +689,7 @@ String slotsString = sb.toString();
 	    const roomType = button.getAttribute('data-roomtype');
 	    const labType = button.getAttribute('data-labtype');
 
+	  	document.getElementById('editRoomTitleId').innerText=roomId;
 	    document.getElementById('editRoomId').value = roomId;
 	    document.getElementById('editRoomCapacity').value = capacity;
 	    document.getElementById('editRoomType').value = roomType;

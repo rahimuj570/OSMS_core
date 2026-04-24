@@ -44,6 +44,7 @@ public class GenerateRoutineServlet extends HttpServlet {
 		TeacherData.getTeachers();
 		
 		String efficiency = request.getParameter("efficiency");
+		String outsidePreferred = request.getParameter("outsidePreferred");
 
 		if (!CSPSolver.isSolverRunning) {
 			CSPSolver.isSolverRunning = true;

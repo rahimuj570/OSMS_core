@@ -1,6 +1,7 @@
 package algorithm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,8 @@ import entity.Room;
 import entity.RoomType;
 import entity.Section;
 import entity.Teacher;
+import helper.CSVRoutineExporter;
+import helper.CSVTeacherScheduleExporter;
 import local_db.CourseData;
 import local_db.RoomData;
 import local_db.SectionData;
@@ -88,9 +91,24 @@ public class Main {
 
 						long roomDayMask = r.availability[day];
 
+//						for (int start = 0; start + slotCount <= SLOTS_PER_DAY; start++) {
+//
+//							long neededMask = ((1L << slotCount) - 1) << start;
+//
+//							if ((roomDayMask & neededMask) != neededMask)
+//								continue;
+//
+//							v.domain.add(new Value(day, start, slotCount, r.id, t.id));
+//						}
+						long lunchMask = ((1L << 2) - 1) << 6; // slots 6 & 7 are lunch
+
 						for (int start = 0; start + slotCount <= SLOTS_PER_DAY; start++) {
 
 							long neededMask = ((1L << slotCount) - 1) << start;
+
+							// ❌ BLOCK lunch overlap
+							if ((neededMask & lunchMask) != 0)
+								continue;
 
 							if ((roomDayMask & neededMask) != neededMask)
 								continue;
@@ -136,6 +154,10 @@ public class Main {
 		}
 	}
 
+	public static boolean isComplete = false;
+	public static Map<String, Boolean> inCompleteLabOriented= new HashMap<String, Boolean>();
+	public static boolean isLabOrientedIncomplete =false;
+
 	public static void main(String[] args) {
 
 		List<Variable> vars = generateVariables(CourseData.courses, SectionData.sections);
@@ -165,10 +187,12 @@ public class Main {
 		CSPSolver.reset();
 		boolean solved = CSPSolver.solve(state);
 
-		if (!CSPSolver.getBestAssignment().isEmpty()) {
+		isComplete = false;
+		if (CSPSolver.getBestAssignment().size() == state.variables.size()) {
 			System.out.println("Solution FOUND");
+			isComplete = true;
 		} else {
-			System.out.println("NO solution exists");
+			System.out.println("NO complete solution");
 		}
 
 		int countAssigned = 0;
@@ -177,6 +201,8 @@ public class Main {
 		int countUnassignedLab = 0;
 		int countUnasignedLabOrientedTheory = 0;
 		ArrayList<String> unassigedVarId = new ArrayList<String>();
+		inCompleteLabOriented = new HashMap<>();
+		isLabOrientedIncomplete = false;
 		for (var a : state.variables.values()) {
 			if (a.assigned) {
 				countAssigned++;
@@ -191,7 +217,22 @@ public class Main {
 				}
 				unassigedVarId.add(a.id);
 			}
+
+			// check incomplete labOriented
+			if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
+				inCompleteLabOriented.putIfAbsent(a.section.id+"_"+a.course.id, false);
+				Room r = state.rooms.get(a.assignedValue.roomId);
+				if (r.type == RoomType.LAB)
+					inCompleteLabOriented.put(a.section.id+"_"+a.course.id, true);
+			}
 		}
+	isLabOrientedIncomplete = inCompleteLabOriented.containsValue(false);
+	System.out.println(isLabOrientedIncomplete);
+	for(String a: inCompleteLabOriented.keySet()) {
+		if(inCompleteLabOriented.get(a)==false) {
+			System.out.println(a);
+		};
+	}
 
 //		 restore best found assignment
 		if (!CSPSolver.getBestAssignment().isEmpty()) {
@@ -216,6 +257,8 @@ public class Main {
 		System.out.println("\nSolved: " + solved);
 		System.out.println("Timeout: " + Main.timeout);
 		System.out.println("BestAssignment size: " + CSPSolver.getBestAssignment().size());
+		CSVRoutineExporter.export(state, "routine.csv");
+		CSVTeacherScheduleExporter.export(state, "teacher_shedules.csv");
 
 		if (CSPSolver.getBestAssignment().isEmpty()) {
 			System.out.println("Total Variable= " + state.variables.size());

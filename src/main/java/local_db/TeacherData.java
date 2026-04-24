@@ -6,13 +6,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import entity.Teacher;
 import helper.ConnectionProvider;
 
 public class TeacherData {
-	
+
 	public enum TN {
 		A_K_M_MONZURUL_ISLAM, // A.K.M. Monzurul Islam
 		ABU_SUFIAN_MD_SHAHED, // Abu Sufian Md. Shahed
@@ -24,13 +25,10 @@ public class TeacherData {
 		MD_NAHID, // Md. Nahid
 		MD_NURUL_ISLAM, // Md. Nurul Islam
 		MD_RAHAD_ISLAM_BHUIYAN, // Md. Rahad Islam Bhuiyan
-		NUR_MUHAMMAD_FAHAD, REDUANUL_BARI_SHUVON, SABIKUN_NAHAR_ZERIN, SADIA_NUR_NAZIFA, SALEHIN_MAHBUB,
-		SAMIA_SABAH, SHAILA_SHARMIN, SM_MONIRUZZAMAN, SUMITRA_GHOSH, SYEDA_TASFIA, TUHIN_HOSSAIN;
+		NUR_MUHAMMAD_FAHAD, REDUANUL_BARI_SHUVON, SABIKUN_NAHAR_ZERIN, SADIA_NUR_NAZIFA, SALEHIN_MAHBUB, SAMIA_SABAH,
+		SHAILA_SHARMIN, SM_MONIRUZZAMAN, SUMITRA_GHOSH, SYEDA_TASFIA, TUHIN_HOSSAIN;
 	}
 
-	
-	
-	
 //	// t1 and t2 were already given by you
 //			static Teacher t1 = new Teacher(TN.A_K_M_MONZURUL_ISLAM.name(),
 //					new boolean[] { false, true, true, true, false, false, true }); // Fri, Sun, Mon, Tue
@@ -138,41 +136,41 @@ public class TeacherData {
 //					Map.entry(t16.id, t16), Map.entry(t17.id, t17), Map.entry(t18.id, t18), Map.entry(t19.id, t19),
 //					Map.entry(t20.id, t20), Map.entry(t21.id, t21), Map.entry(t22.id, t22), Map.entry(t23.id, t23),
 //					Map.entry(t24.id, t24), Map.entry(t25.id, t25), Map.entry(t26.id, t26));
-	
-	public static Map<Integer, Teacher> teachers= new HashMap<Integer, Teacher>();
-	
-	public static Map<Integer, Teacher> getTeachers(){
+
+	public static Map<Integer, Teacher> teachers = new LinkedHashMap<>();
+
+	public static Map<Integer, Teacher> getTeachers() {
 		teachers.clear();
-				
+
 		Connection con = ConnectionProvider.getCon();
-		
+
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from teachers");
+			PreparedStatement pst = con.prepareStatement("select * from teachers order by teacher_name");
 			ResultSet res = pst.executeQuery();
-			
-			while(res.next()) {
+
+			while (res.next()) {
 				int teacherId = res.getInt("teacher_id");
 				String name = res.getString("teacher_name");
 				ArrayList<Boolean> avail = new ArrayList<Boolean>();
-				
-				avail.add(res.getInt("saturday")==0?false:true);
-				avail.add(res.getInt("sunday")==0?false:true);
-				avail.add(res.getInt("monday")==0?false:true);
-				avail.add(res.getInt("tuesday")==0?false:true);
-				avail.add(res.getInt("wednesday")==0?false:true);
-				avail.add(res.getInt("thursday")==0?false:true);
-				avail.add(res.getInt("friday")==0?false:true);
-				
-				Teacher teacher = new Teacher(teacherId,name,avail);
+
+				avail.add(res.getInt("saturday") == 0 ? false : true);
+				avail.add(res.getInt("sunday") == 0 ? false : true);
+				avail.add(res.getInt("monday") == 0 ? false : true);
+				avail.add(res.getInt("tuesday") == 0 ? false : true);
+				avail.add(res.getInt("wednesday") == 0 ? false : true);
+				avail.add(res.getInt("thursday") == 0 ? false : true);
+				avail.add(res.getInt("friday") == 0 ? false : true);
+
+				Teacher teacher = new Teacher(teacherId, name, avail);
 				teachers.put(teacherId, teacher);
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return teachers;
+
 	}
-	
-	
+
 }

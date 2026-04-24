@@ -55,7 +55,7 @@
 					<th>Preferred Teacher</th>
 					<th>Blacklisted Teacher</th>
 					<th>Sections</th>
-					<th></th>
+					<th colspan="2"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -115,6 +115,11 @@
 							data-preferred="<%=c.getPreferredTeachersCsv()%>"
 							data-forbidden="<%=c.getForbiddenTeachersCsv()%>">Edit</button>
 					</td>
+
+					<td><a
+						href="<%=request.getContextPath()%>/DeleteCourseServlet?course_id=<%=c.id%>"><button
+								style="background: red">Delete</button></a></td>
+
 
 				</tr>
 				<%
@@ -218,10 +223,10 @@
 		aria-labelledby="editCourseLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
-				<div class="modal-header bg-maroon text-white">
-					<h5 class="modal-title" id="editCourseLabel">Edit Course</h5>
-					<button type="button" class="btn-close btn-close-white"
-						data-bs-dismiss="modal"></button>
+				<div class="modal-header">
+					<h5 class="modal-title" id="addTeacherModalLabel">Edit Course (<small id="editCourseTitleId"></small>)</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<form action="<%=request.getContextPath()%>/EditCourseServlet"
@@ -322,69 +327,42 @@
 
 
 	<script>
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-
+  /**
+   * 1. MENU TOGGLE (Mobile)
+   */
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (menuToggle) {
     menuToggle.addEventListener('click', () => {
       navLinks.classList.toggle('active');
     });
-  </script>
-	<!-- Bootstrap JS -->
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  }
 
-
-
-	<script>
-	  const courseTypeSelect = document.getElementById('courseType');
-	  const requiredLabWrapper = document.getElementById('requiredLabWrapper');
-	  const requiredLabSelect = document.getElementById('requiredLab');
-
-	  courseTypeSelect.addEventListener('change', () => {
-	    if (courseTypeSelect.value === 'LAB' || courseTypeSelect.value === 'LAB_ORIENTED_THEORY') {
-	      requiredLabWrapper.style.display = 'block';
-	      requiredLabSelect.required = true;
-	    } else {
-	      requiredLabWrapper.style.display = 'none';
-	      requiredLabSelect.value = "";
-	      requiredLabSelect.required = false;
-	    }
-	  });
-	</script>
-
-	<script type="text/javascript">
-	const editCourseTypeSelect = document.getElementById('editCourseType');
-	  const editRequiredLabWrapper = document.getElementById('editRequiredLabWrapper');
-	  const editRequiredLabSelect = document.getElementById('editRequiredLab');
-
-	  editCourseTypeSelect.addEventListener('change', () => {
-	    if (editCourseTypeSelect.value === 'LAB' || editCourseTypeSelect.value === 'LAB_ORIENTED_THEORY') {
-	      editRequiredLabWrapper.style.display = 'block';
-	      editRequiredLabSelect.required = true;
-	    } else {
-	      editRequiredLabWrapper.style.display = 'none';
-	      editRequiredLabSelect.value = "";
-	      editRequiredLabSelect.required = false;
-	    }
-	  });
-	</script>
-
-	<script>
-  const preferredSelect = document.getElementById('preferredTeachers');
-  const forbiddenSelect = document.getElementById('forbiddenTeachers');
-
-  // Helper: toggle selection on click
+  /**
+   * 2. SHARED HELPERS: Click-to-Toggle & Sync Logic
+   */
+  
+  // Custom multi-select toggle (click without holding Ctrl/Cmd)
+  // FIXED: Added check to prevent clicking disabled options
   function enableToggle(selectElement) {
+    if (!selectElement) return;
     Array.from(selectElement.options).forEach(opt => {
       opt.addEventListener('mousedown', e => {
-        e.preventDefault(); // prevent default selection behavior
-        opt.selected = !opt.selected; // toggle manually
-        selectElement.dispatchEvent(new Event('change')); // trigger sync
+        e.preventDefault();
+        
+        // --- THE FIX: If the option is disabled by the opposite list, ignore click ---
+        if (opt.disabled) return; 
+
+        opt.selected = !opt.selected;
+        selectElement.dispatchEvent(new Event('change'));
       });
     });
   }
 
-  function syncLists() {
+  // Mutual exclusion logic: if selected in list A, disable in list B
+  function syncLists(preferredSelect, forbiddenSelect) {
+    if (!preferredSelect || !forbiddenSelect) return;
+    
     const preferredValues = Array.from(preferredSelect.selectedOptions).map(opt => opt.value);
     const forbiddenValues = Array.from(forbiddenSelect.selectedOptions).map(opt => opt.value);
 
@@ -399,122 +377,111 @@
     });
   }
 
-  preferredSelect.addEventListener('change', syncLists);
-  forbiddenSelect.addEventListener('change', syncLists);
+  /**
+   * 3. ADD COURSE MODAL LOGIC
+   */
+  const courseTypeSelect = document.getElementById('courseType');
+  const requiredLabWrapper = document.getElementById('requiredLabWrapper');
+  const requiredLabSelect = document.getElementById('requiredLab');
+  const preferredSelect = document.getElementById('preferredTeachers');
+  const forbiddenSelect = document.getElementById('forbiddenTeachers');
 
-  // Enable toggle behavior
-  enableToggle(preferredSelect);
-  enableToggle(forbiddenSelect);
-
-  // Initial sync
-  syncLists();
-</script>
-
-	<script>
-  const editCourseModal = document.getElementById('editCourseModal');
-  editCourseModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    const courseId = button.getAttribute('data-courseid');
-    const courseType = button.getAttribute('data-coursetype');
-    const requiredLab = button.getAttribute('data-requiredlab');
-    const sectionsData = button.getAttribute('data-sections'); // comma-separated
-    const preferredData = button.getAttribute('data-preferred'); // comma-separated
-    const forbiddenData = button.getAttribute('data-forbidden'); // comma-separated
-
-    document.getElementById('editCourseId').value = courseId;
-    document.getElementById('editCourseType').value = courseType;
-
-    if(courseType === 'LAB' || courseType === 'LAB_ORIENTED_THEORY'){
-      document.getElementById('editRequiredLabWrapper').style.display = 'block';
-      document.getElementById('editRequiredLab').value = requiredLab;
-    } else {
-      document.getElementById('editRequiredLabWrapper').style.display = 'none';
-      document.getElementById('editRequiredLab').value = "";
-    }
-
-    // Prefill sections
-    if(sectionsData){
-      const sectionsArr = sectionsData.split(',');
-      document.querySelectorAll('#editSections option').forEach(opt=>{
-        opt.selected = sectionsArr.includes(opt.value);
-      });
-    }else{
-    	const sectionsArr = sectionsData.split(',');
-        document.querySelectorAll('#editSections option').forEach(opt=>{
-          opt.selected = false;
-        });
-    }
-
-    // Prefill preferred teachers
-    if(preferredData){
-      const prefArr = preferredData.split(',');
-      document.querySelectorAll('#editPreferredTeachers option').forEach(opt=>{
-        opt.selected = prefArr.includes(opt.value);
-      });
-    }else{
-    	const prefArr = preferredData.split(',');
-        document.querySelectorAll('#editPreferredTeachers option').forEach(opt=>{
-          opt.selected = false;
-        });
-    }
-
-    // Prefill forbidden teachers
-    if(forbiddenData){
-      const forbArr = forbiddenData.split(',');
-      document.querySelectorAll('#editForbiddenTeachers option').forEach(opt=>{
-        opt.selected = forbArr.includes(opt.value);
-      });
-    }else{
-    	const forbArr = forbiddenData.split(',');
-        document.querySelectorAll('#editForbiddenTeachers option').forEach(opt=>{
-          opt.selected = forbArr.includes(opt.value);
-        });
-    }
-  });
-</script>
-
-	<script>
-  // Toggle selection on click
-  function enableToggle(selectElement) {
-    Array.from(selectElement.options).forEach(opt => {
-      opt.addEventListener('mousedown', e => {
-        e.preventDefault();
-        opt.selected = !opt.selected;
-        selectElement.dispatchEvent(new Event('change'));
-      });
+  // Lab Toggle
+  if (courseTypeSelect) {
+    courseTypeSelect.addEventListener('change', () => {
+      const isLab = (courseTypeSelect.value === 'LAB' || courseTypeSelect.value === 'LAB_ORIENTED_THEORY');
+      requiredLabWrapper.style.display = isLab ? 'block' : 'none';
+      requiredLabSelect.required = isLab;
+      if (!isLab) requiredLabSelect.value = "";
     });
   }
 
+  // Teacher Selection Sync
+  if (preferredSelect && forbiddenSelect) {
+    enableToggle(preferredSelect);
+    enableToggle(forbiddenSelect);
+
+    preferredSelect.addEventListener('change', () => syncLists(preferredSelect, forbiddenSelect));
+    forbiddenSelect.addEventListener('change', () => syncLists(preferredSelect, forbiddenSelect));
+    
+    syncLists(preferredSelect, forbiddenSelect); // Initial run
+  }
+
+  /**
+   * 4. EDIT COURSE MODAL LOGIC
+   */
+  const editCourseModal = document.getElementById('editCourseModal');
+  const editCourseTypeSelect = document.getElementById('editCourseType');
+  const editRequiredLabWrapper = document.getElementById('editRequiredLabWrapper');
+  const editRequiredLabSelect = document.getElementById('editRequiredLab');
   const editSections = document.getElementById('editSections');
   const editPreferredTeachers = document.getElementById('editPreferredTeachers');
   const editForbiddenTeachers = document.getElementById('editForbiddenTeachers');
 
-  enableToggle(editSections);
-  enableToggle(editPreferredTeachers);
-  enableToggle(editForbiddenTeachers);
+  if (editCourseModal) {
+    // Initialize Toggles
+    enableToggle(editSections);
+    enableToggle(editPreferredTeachers);
+    enableToggle(editForbiddenTeachers);
 
-  // Mutual exclusion for preferred vs forbidden teachers
-  function syncLists() {
-    const preferredValues = Array.from(editPreferredTeachers.selectedOptions).map(opt => opt.value);
-    const forbiddenValues = Array.from(editForbiddenTeachers.selectedOptions).map(opt => opt.value);
+    // Sync Listeners
+    editPreferredTeachers.addEventListener('change', () => syncLists(editPreferredTeachers, editForbiddenTeachers));
+    editForbiddenTeachers.addEventListener('change', () => syncLists(editPreferredTeachers, editForbiddenTeachers));
 
-    Array.from(editForbiddenTeachers.options).forEach(opt => {
-      opt.disabled = preferredValues.includes(opt.value);
+    // Lab Toggle for Edit
+    editCourseTypeSelect.addEventListener('change', () => {
+      const isLab = (editCourseTypeSelect.value === 'LAB' || editCourseTypeSelect.value === 'LAB_ORIENTED_THEORY');
+      editRequiredLabWrapper.style.display = isLab ? 'block' : 'none';
+      editRequiredLabSelect.required = isLab;
+      if (!isLab) editRequiredLabSelect.value = "";
     });
-    Array.from(editPreferredTeachers.options).forEach(opt => {
-      opt.disabled = forbiddenValues.includes(opt.value);
+
+    // Populate Modal Data
+    editCourseModal.addEventListener('show.bs.modal', event => {
+      const button = event.relatedTarget;
+      const courseId = button.getAttribute('data-courseid');
+      const courseType = button.getAttribute('data-coursetype');
+      const requiredLab = button.getAttribute('data-requiredlab');
+      const sectionsData = button.getAttribute('data-sections') || "";
+      const preferredData = button.getAttribute('data-preferred') || "";
+      const forbiddenData = button.getAttribute('data-forbidden') || "";
+
+      document.getElementById('editCourseTitleId').innerText = courseId;
+      document.getElementById('editCourseId').value = courseId;
+      editCourseTypeSelect.value = courseType;
+
+      // Handle Lab Visibility
+      const isLab = (courseType === 'LAB' || courseType === 'LAB_ORIENTED_THEORY');
+      editRequiredLabWrapper.style.display = isLab ? 'block' : 'none';
+      editRequiredLabSelect.value = isLab ? requiredLab : "";
+
+      // Prefill Multi-selects
+      const setSelections = (selectEl, dataString) => {
+        const values = dataString.split(',');
+        Array.from(selectEl.options).forEach(opt => {
+          opt.selected = values.includes(opt.value);
+        });
+      };
+
+      setSelections(editSections, sectionsData);
+      setSelections(editPreferredTeachers, preferredData);
+      setSelections(editForbiddenTeachers, forbiddenData);
+
+      // Trigger sync immediately after pre-filling to lock disabled options
+      syncLists(editPreferredTeachers, editForbiddenTeachers);
     });
   }
 
-  editPreferredTeachers.addEventListener('change', syncLists);
-  editForbiddenTeachers.addEventListener('change', syncLists);
-  syncLists();
-
-  // Clear All Sections button
-  document.getElementById('clearSectionsBtn').addEventListener('click', () => {
-    Array.from(editSections.options).forEach(opt => opt.selected = false);
-  });
+  // Clear All Sections Button
+  const clearSectionsBtn = document.getElementById('clearSectionsBtn');
+  if (clearSectionsBtn && editSections) {
+    clearSectionsBtn.addEventListener('click', () => {
+      Array.from(editSections.options).forEach(opt => opt.selected = false);
+    });
+  }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 
 </body>

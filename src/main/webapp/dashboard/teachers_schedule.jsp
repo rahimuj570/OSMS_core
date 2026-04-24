@@ -1,3 +1,4 @@
+<%@page import="entity.Teacher"%>
 <%@page import="local_db.TeacherData"%>
 <%@page import="java.util.Comparator"%>
 <%@page import="algorithm.Value"%>
@@ -16,7 +17,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Generated Routine</title>
+<title>Generated Teachers Schedule</title>
 <style type="text/css">
 body {
 	font-family: Arial, sans-serif;
@@ -103,39 +104,8 @@ body {
 </head>
 <body>
 	<header class="routine-header">
-		<h1>Final Routine</h1>
-		<%
-		if (Main.isComplete == false) {
-		%>
-		<h2>Result might be incomplete due to resource insufficient!</h2>
-
-		<%
-		if (Main.isLabOrientedIncomplete) {
-		%>
-		<div style="display: flex;
-  justify-content: center;">
-		<div
-			style="text-align: left; background: white; width: fit-content; color: red; padding: 10px; border-radius: 15px;">
-			<h3>Lab Oriented Courses could not got at least one LAB
-				classroom</h3>
-
-			<ul>
-				<%
-				for (String loid : Main.inCompleteLabOriented.keySet()) {
-					if (Main.inCompleteLabOriented.get(loid) == false) {
-				%>
-				<li><%=loid%></li>
-
-				<%
-				}
-				}
-				%>
-			</ul>
-		</div></div>
-		<%
-		}
-		}
-		%>
+		<h1>Teacher's Schedule</h1>
+		
 	</header>
 
 	<main>
@@ -146,19 +116,19 @@ body {
 		vars.sort(
 				Comparator.comparingInt((Variable v) -> v.assignedValue.day).thenComparingInt(v -> v.assignedValue.startSlot));
 
-		for (Section sec : state.sections.values()) {
+		for (Teacher t : state.teachers.values()) {
 		%>
 		<section class="routine-section">
 			<h2>
-				Section:
-				<%=sec.id%></h2>
+				Teacher:
+				<%=t.name%></h2>
 			<table class="routine-table">
 				<thead>
 					<tr>
 						<th>Day</th>
 						<th>Time</th>
 						<th>Course</th>
-						<th>Teacher</th>
+						<th>Section</th>
 						<th>Room</th>
 					</tr>
 				</thead>
@@ -166,7 +136,7 @@ body {
 					<%
 					for (Variable v : vars) {
 
-						if (v.section.id != sec.id) {
+						if (v.assignedValue.teacherId != t.id) {
 							continue;
 						}
 						Value val = v.assignedValue;
@@ -179,7 +149,7 @@ body {
 						<td><%=day%></td>
 						<td><%=time%></td>
 						<td><%=v.course.id%></td>
-						<td><%=TeacherData.teachers.get(val.teacherId).name%></td>
+						<td><%=v.section.id%></td>
 						<td><%=val.roomId%></td>
 					</tr>
 
@@ -196,8 +166,8 @@ body {
 
 		<!-- Print Button -->
 		<button class="print-btn" onclick="window.print()">🖨️ Print
-			Routine</button>
-			<a href="teachers_schedule.jsp"><button class="print-btn">Teacher's Schedule</button></a>
+			Schedule</button>
+			<a href="generated_routine.jsp"><button class="print-btn">Section Routine</button></a>
 		<a href="courses.jsp"><button class="print-btn">🏠 Home</button></a>
 	</main>
 </body>

@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import entity.Course;
+import local_db.CourseData;
+
 
 public class SoftConstraints {
 
@@ -13,7 +16,6 @@ public class SoftConstraints {
 	    p += teacherLoadPenalty(s);
 	    p += sectionDaySpreadPenalty(s);
 	    p += preferredTeacherPenalty(s);
-	    p += teacherConsistencyPenalty(s);
 	    return p;
 	}
 
@@ -57,68 +59,43 @@ public class SoftConstraints {
 	
 	private static int preferredTeacherPenalty(CSPState s) {
 	    int penalty = 0;
-
-	    for (Variable v : s.variables.values()) {
-
-	        if (!v.assigned) continue;
-
-	        int t = v.assignedValue.teacherId;
-
-	        if (v.course.preferredTeachers != null &&
-	            !v.course.preferredTeachers.contains(t)) {
-
-	            penalty += 100; 
-	        }
-	    }
-
-	    return penalty;
-	}
-	
-	private static int teacherConsistencyPenalty(CSPState s) {
-
-	    int penalty = 0;
-
-	    // key = courseId + sectionId
-	    Map<String, Set<Integer>> teacherMap = new HashMap<>();
-
-	    for (Variable v : s.variables.values()) {
-
-	        if (!v.assigned) continue;
-
-	        String key = v.course.id + "_" + v.section.id;
-
-	        teacherMap.putIfAbsent(key, new HashSet<>());
-	        teacherMap.get(key).add(v.assignedValue.teacherId);
-	    }
-
-	    for (Set<Integer> teachers : teacherMap.values()) {
-
-	        if (teachers.size() > 1) {
-	            //penalty per multiple  teacher
-	            penalty += (teachers.size() - 1) * 200;
-	        }
-	    }
-	    return penalty;
-	}
-	
-//	private static int sameDayClusterPenalty(CSPState s) {
-//	    int penalty = 0;
 //
-//	    for (String secId : s.sections.keySet()) {
+//	    for (Variable v : s.variables.values()) {
 //
-//	        long[] days = s.sectionOccupied.get(secId);
+//	        if (!v.assigned) continue;
 //
-//	        for (int d = 0; d < days.length; d++) {
+//	        int t = v.assignedValue.teacherId;
 //
-//	            int slotsUsed = Long.bitCount(days[d]);
+//	        if (v.course.preferredTeachers != null &&
+//	            !v.course.preferredTeachers.contains(t)) {
 //
-//	            if (slotsUsed > 4) {
-//	                penalty += (slotsUsed - 4) * 3;
-//	            }
+//	            penalty += 100; 
 //	        }
 //	    }
-//
-//	    return penalty;
-//	}
+	    
+	    
+	    
+	    Map<String, Integer> assigned = s.courseSectionTeacher;
+
+	    for (String key : assigned.keySet()) {
+
+	        int teacher = assigned.get(key);
+
+	        // extract courseId
+	        String courseId = key.split("_")[1];
+
+	        Course c = CourseData.courses.stream().filter(ct -> ct.id==courseId).findFirst().orElse(null);
+
+	        if (c!=null && c.preferredTeachers != null &&
+	            !c.preferredTeachers.contains(teacher)) {
+
+	            penalty += 200;
+	        }
+	    }
+
+	    return penalty;
+	}
+	
+	
 
 }

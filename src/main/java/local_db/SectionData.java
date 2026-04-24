@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import entity.Section;
 import helper.ConnectionProvider;
@@ -35,7 +37,7 @@ public class SectionData {
 //			Map.entry(s14B.id, s14B), Map.entry(s13A.id, s13A), Map.entry(s13B.id, s13B),
 //			Map.entry(s11_12A.id, s11_12A), Map.entry(s11_12B.id, s11_12B), Map.entry(s11_12C.id, s11_12C));
 	
-	public static Map<String, Section> sections = new HashMap<String, Section>();
+	public static Map<String, Section> sections = new LinkedHashMap<String, Section>();
 	
 	public static Map<String, Section> getSections(){
 		sections.clear();
@@ -43,7 +45,7 @@ public class SectionData {
 		Connection con = ConnectionProvider.getCon();
 		
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from sections");
+			PreparedStatement pst = con.prepareStatement("select * from sections order by section_id");
 			ResultSet res = pst.executeQuery();
 			
 			while(res.next()) {
@@ -57,7 +59,7 @@ public class SectionData {
 		}
 		
 		
-		return sections;
+		return  sections;
 	}
 
 }

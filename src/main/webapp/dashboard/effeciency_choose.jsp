@@ -77,12 +77,21 @@ body {
 				value="high"> High
 			</label><br> <label> <input type="radio" name="efficiency"
 				value="optimal"> Optimal
-			</label><br>
-			<br>
+			</label><br> <br> <label>Want to use teachers outside of
+				preferred list for a course?</label>
+			<div style="display: flex;
+  justify-content: center;">
+				<input checked="checked" type="radio" id="useYes" name="outsidePreferred" value="yes">
+				<label for="useYes">Yes</label> <input style="margin-left: 30px" type="radio" id="useNo"
+					name="outsidePreferred" value="no"> <label for="useNo">No</label>
+			</div>
+
 
 			<button type="submit" class="print-btn">Generate Routine</button>
 		</form>
-			<center><a href="courses.jsp"><button class="print-btn">🏠 Home</button></a></center>
+		<center>
+			<a href="courses.jsp"><button class="print-btn">🏠 Home</button></a>
+		</center>
 	</main>
 </body>
 </html>

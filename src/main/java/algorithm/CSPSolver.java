@@ -14,8 +14,9 @@ public class CSPSolver {
 	public static int routineGenerationPercentage = 0;
 	public static boolean isSolverRunning = false;
 	public static String efficiency = "";
+	public static String outsidePreferred = "";
 
-	private static long divisor=100000;
+	private static long divisor = 100000;
 	private static boolean shouldTakeFirstSolution = false;
 	private static int bestScore = Integer.MAX_VALUE;
 	private static Map<String, Value> bestAssignment = new HashMap<>();
@@ -76,6 +77,7 @@ public class CSPSolver {
 				for (Variable v : s.variables.values())
 					bestAssignment.put(v.id, v.assignedValue);
 			}
+
 			if (shouldTakeFirstSolution) {
 				routineGenerationPercentage = 100;
 				return true;
@@ -132,6 +134,12 @@ public class CSPSolver {
 		if (c.forbiddenTeachers != null && c.forbiddenTeachers.contains(val.teacherId))
 			return false;
 
+		// // HARD: preferred teacher
+		if (outsidePreferred.equalsIgnoreCase("no")) {
+			if (c.preferredTeachers != null && !c.preferredTeachers.contains(val.teacherId))
+				return false;
+		}
+
 		if (!t.availability.get(val.day)) {
 			return false;
 		}
@@ -177,7 +185,20 @@ public class CSPSolver {
 			}
 		}
 
+		// Must be same teacher forr a specific section fpr same course
+		String k = key(v);
+		int assignedTeacher = s.courseSectionTeacher.getOrDefault(k, 0);
+
+		if (assignedTeacher != 0 && assignedTeacher != val.teacherId) {
+			return false;
+		}
+
 		return true;
+	}
+
+	/// HEleper FOR courseSectionTeacher
+	private static String key(Variable v) {
+		return v.section.id + "_" + v.course.id;
 	}
 
 	private static void assign(CSPState s, Variable v, Value val) {
@@ -188,6 +209,13 @@ public class CSPSolver {
 		s.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
 		s.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
 		s.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
+
+		String k = key(v);
+
+		// assign teacher if first time
+		if (!s.courseSectionTeacher.containsKey(k)) {
+			s.courseSectionTeacher.put(k, val.teacherId);
+		}
 	}
 
 	private static void unassign(CSPState s, Variable v, Value val) {
@@ -197,6 +225,25 @@ public class CSPSolver {
 
 		v.assigned = false;
 		v.assignedValue = null;
+
+		String k = key(v);
+
+		// check if this was the last variable using this teacher
+		boolean stillUsed = false;
+
+		for (Variable other : s.variables.values()) {
+			if (other == v || !other.assigned)
+				continue;
+
+			if (key(other).equals(k)) {
+				stillUsed = true;
+				break;
+			}
+		}
+
+		if (!stillUsed) {
+			s.courseSectionTeacher.remove(k);
+		}
 	}
 
 	private static boolean validateLabOriented(CSPState s) {
