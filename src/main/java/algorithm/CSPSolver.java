@@ -192,6 +192,13 @@ public class CSPSolver {
 		if (assignedTeacher != 0 && assignedTeacher != val.teacherId) {
 			return false;
 		}
+		
+		// Teacher weekly limit
+		int currentLoad = s.teacherWeeklyLoad.get(val.teacherId);
+
+		if (currentLoad + (val.slotCount*30)/60 > t.maxSlotHours) {
+		    return false;
+		}
 
 		return true;
 	}
@@ -216,6 +223,12 @@ public class CSPSolver {
 		if (!s.courseSectionTeacher.containsKey(k)) {
 			s.courseSectionTeacher.put(k, val.teacherId);
 		}
+		
+		// NEW
+	    s.teacherWeeklyLoad.put(
+	        val.teacherId,
+	        s.teacherWeeklyLoad.get(val.teacherId) + (val.slotCount*30)/60
+	    );
 	}
 
 	private static void unassign(CSPState s, Variable v, Value val) {
@@ -244,6 +257,11 @@ public class CSPSolver {
 		if (!stillUsed) {
 			s.courseSectionTeacher.remove(k);
 		}
+		
+		 s.teacherWeeklyLoad.put(
+			        val.teacherId,
+			        s.teacherWeeklyLoad.get(val.teacherId) - (val.slotCount*30)/60
+			    );
 	}
 
 	private static boolean validateLabOriented(CSPState s) {

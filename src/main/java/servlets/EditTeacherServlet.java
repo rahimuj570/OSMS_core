@@ -39,7 +39,9 @@ public class EditTeacherServlet extends HttpServlet {
 		HttpSession sc = request.getSession();
 		String teacherId = request.getParameter("teacherId");
 		String teacherName = request.getParameter("editTeacherName");
+		int teacherSlotMaxHours =Integer.parseInt(request.getParameter("editTeacherMaxSlotHours"));
 		String[] availability = request.getParameterValues("availability");
+		
 
 		// Convert availability into boolean[7]
 		boolean[] days = new boolean[7];
@@ -58,13 +60,14 @@ public class EditTeacherServlet extends HttpServlet {
 		try {
 
 			PreparedStatement pst = con.prepareStatement(
-					"UPDATE teachers SET teacher_name=?, saturday=?, sunday=?, monday=?, tuesday=?, wednesday=?, thursday=?, friday=? WHERE teacher_id=?");
+					"UPDATE teachers SET teacher_name=?,max_slot_hours=?, saturday=?, sunday=?, monday=?, tuesday=?, wednesday=?, thursday=?, friday=? WHERE teacher_id=?");
 
 			pst.setString(1, teacherName);
+			pst.setInt(2, teacherSlotMaxHours);
 			for (int i = 0; i < 7; i++) {
-				pst.setInt(i + 2, days[i] ? 1 : 0);
+				pst.setInt(i + 3, days[i] ? 1 : 0);
 			}
-			pst.setString(9, teacherId);
+			pst.setString(10, teacherId);
 
 			int rows = pst.executeUpdate();
 			if (rows > 0) {

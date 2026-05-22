@@ -16,8 +16,10 @@ public class CSPState {
 	public Map<Integer, long[]> teacherOccupied = new HashMap<>();
 	public Map<String, long[]> roomOccupied = new HashMap<>();
 	public Map<String, long[]> sectionOccupied = new HashMap<>();
-	
+
 	public Map<String, Integer> courseSectionTeacher = new HashMap<>();
+
+	public Map<Integer, Integer> teacherWeeklyLoad = new HashMap<>();
 
 	public CSPState(Map<Integer, Teacher> teachers, Map<String, Room> rooms, Map<String, Section> sections) {
 
@@ -33,6 +35,11 @@ public class CSPState {
 
 		for (String s : sections.keySet())
 			sectionOccupied.put(s, new long[7]);
+
+		for (Integer t : teachers.keySet()) {
+			teacherWeeklyLoad.put(t, 0);
+		}
+
 	}
 
 	public void clearOccupations() {

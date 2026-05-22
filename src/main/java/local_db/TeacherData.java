@@ -151,6 +151,7 @@ public class TeacherData {
 			while (res.next()) {
 				int teacherId = res.getInt("teacher_id");
 				String name = res.getString("teacher_name");
+				int maxSlotHours = res.getInt("max_slot_hours");
 				ArrayList<Boolean> avail = new ArrayList<Boolean>();
 
 				avail.add(res.getInt("saturday") == 0 ? false : true);
@@ -161,7 +162,7 @@ public class TeacherData {
 				avail.add(res.getInt("thursday") == 0 ? false : true);
 				avail.add(res.getInt("friday") == 0 ? false : true);
 
-				Teacher teacher = new Teacher(teacherId, name, avail);
+				Teacher teacher = new Teacher(teacherId, name, avail,maxSlotHours );
 				teachers.put(teacherId, teacher);
 			}
 

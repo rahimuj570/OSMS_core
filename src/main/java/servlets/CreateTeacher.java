@@ -38,6 +38,7 @@ public class CreateTeacher extends HttpServlet {
 		HttpSession sc = request.getSession();
 
 		String teacherName = request.getParameter("teacherName");
+		int teacherMaxSlotHours =Integer.parseInt(request.getParameter("teacherMaxSlotHours"));
 
 		// Fetch multiple checkboxes (availability)
 		String[] availability = request.getParameterValues("availability");
@@ -60,12 +61,13 @@ public class CreateTeacher extends HttpServlet {
 		Connection con = ConnectionProvider.getCon();
 		try {
 			PreparedStatement pst = con.prepareStatement(
-					"INSERT INTO teachers (teacher_name, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?)");
+					"INSERT INTO teachers (teacher_name,max_slot_hours, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?,?)");
 
 			pst.setString(1, teacherName);
+			pst.setInt(2, teacherMaxSlotHours);
 
 			for (int i = 0; i < 7; i++) {
-				pst.setInt(i + 2, days[i] ? 1 : 0);
+				pst.setInt(i + 3, days[i] ? 1 : 0);
 			}
 
 			pst.executeUpdate();

@@ -195,8 +195,10 @@ body {
 
 
 		<!-- Print Button -->
-		<button class="print-btn" onclick="window.print()">🖨️ Print
-			Routine</button>
+	<div style="display: flex;
+  justify-content: center;
+  gap: 18px;">	<a><button class="print-btn" onclick="window.print()">🖨️ Print
+			Routine</button></a><a href="<%=request.getContextPath()%>/ClassCSVExportServlet"><button class="print-btn">📥 Download As CSV</button></a></div>
 			<a href="teachers_schedule.jsp"><button class="print-btn">Teacher's Schedule</button></a>
 		<a href="courses.jsp"><button class="print-btn">🏠 Home</button></a>
 	</main>

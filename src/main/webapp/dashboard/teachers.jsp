@@ -52,6 +52,7 @@
 				<tr>
 					<th>ID</th>
 					<th>Teacher Name</th>
+					<th>Max Slot Hours</th>
 					<th>Saturday</th>
 					<th>Sunday</th>
 					<th>Monday</th>
@@ -70,6 +71,7 @@
     <tr>
         <td><%=t.id%></td>
         <td><%=t.name%></td>
+        <td><%=t.maxSlotHours %></td>
         <% for (int i = 0; i < days.length; i++) { %>
             <td><%= t.availability.get(i) ? "Available" : "Not Available" %></td>
         <% } %>
@@ -79,6 +81,7 @@
                     data-bs-target="#editTeacherModal"
                     data-id="<%=t.id %>"
                     data-name="<%=t.name %>"
+                    data-max-slot-hours="<%=t.maxSlotHours %>"
                     data-availability="<%
                         // Build a comma-separated list of available days dynamically
                        List<String> availableDays = new java.util.ArrayList<>();
@@ -126,6 +129,11 @@
 								name="teacherName" required>
 						</div>
 						<div class="mb-3">
+							<label for="teacherMaxSlotHours" class="form-label">Teacher Max Slot Hours</label>
+							<input type="number" class="form-control" id="teacherMaxSlotHours"
+								name="teacherMaxSlotHours" required>
+						</div>
+						<div class="mb-3">
 							<label class="form-label">Availability</label><br>
 							<div class="form-check form-check-inline">
 								<input class="form-check-input" type="checkbox"
@@ -165,8 +173,7 @@
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="submit" class="btn btn-success">Save
-							Teacher</button>
+						<button type="submit" class="btn btn-success">Save Teacher</button>
 						<button type="button" class="btn btn-secondary"
 							data-bs-dismiss="modal">Cancel</button>
 					</div>
@@ -190,6 +197,11 @@
             <div class="mb-3">
                 <label for="teacherName" class="form-label">Teacher Name</label>
                 <input type="text" class="form-control" id="editTeacherName" name="editTeacherName" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="teacherMaxSlotHours" class="form-label">Teacher Max Slot Hours</label>
+                <input type="number" class="form-control" id="editTeacherMaxSlotHours" name="editTeacherMaxSlotHours" required>
             </div>
 
             <div class="mb-3">
@@ -247,11 +259,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var button = event.relatedTarget;
         var id = button.getAttribute('data-id');
         var name = button.getAttribute('data-name');
+        var max_slot_hours = button.getAttribute('data-max-slot-hours');
         var availability = button.getAttribute('data-availability').split(',');
 
         // Fill form fields
         document.getElementById('teacherId').value = id;
         document.getElementById('editTeacherName').value = name;
+        document.getElementById('editTeacherMaxSlotHours').value = max_slot_hours;
 
         // Reset checkboxes
         document.querySelectorAll('#editTeacherModal input[type=checkbox]').forEach(cb => cb.checked = false);

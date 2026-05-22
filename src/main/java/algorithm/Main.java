@@ -219,11 +219,13 @@ public class Main {
 			}
 
 			// check incomplete labOriented
-			if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
+		try {	if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
 				inCompleteLabOriented.putIfAbsent(a.section.id+"_"+a.course.id, false);
 				Room r = state.rooms.get(a.assignedValue.roomId);
 				if (r.type == RoomType.LAB)
 					inCompleteLabOriented.put(a.section.id+"_"+a.course.id, true);
+			}}catch (Exception e) {
+				// TODO: handle exception
 			}
 		}
 	isLabOrientedIncomplete = inCompleteLabOriented.containsValue(false);
@@ -257,10 +259,11 @@ public class Main {
 		System.out.println("\nSolved: " + solved);
 		System.out.println("Timeout: " + Main.timeout);
 		System.out.println("BestAssignment size: " + CSPSolver.getBestAssignment().size());
-		CSVRoutineExporter.export(state, "routine.csv");
-		CSVTeacherScheduleExporter.export(state, "teacher_shedules.csv");
+//		CSVRoutineExporter.export(state, "routine.csv");
+//		CSVTeacherScheduleExporter.export(state, "teacher_shedules.csv");
 
 		if (CSPSolver.getBestAssignment().isEmpty()) {
+			CSPSolver.routineGenerationPercentage=100;
 			System.out.println("Total Variable= " + state.variables.size());
 			System.out.println("Total Assigned Variable= " + countAssigned);
 			System.out.println("Total Unassigned Variable= " + countUnassigned);
