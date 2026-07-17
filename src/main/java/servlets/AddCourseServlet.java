@@ -52,7 +52,7 @@ public class AddCourseServlet extends HttpServlet {
 			PreparedStatement psCourse = con.prepareStatement(sqlCourse);
 			psCourse.setString(1, courseId);
 			psCourse.setString(2, courseType);
-			if (requiredLab == null || requiredLab.isEmpty()) {
+			if (requiredLab == null || requiredLab.isEmpty() || courseType.equalsIgnoreCase("THEORY")) {
 				psCourse.setNull(3, java.sql.Types.VARCHAR);
 			} else {
 				psCourse.setString(3, requiredLab);

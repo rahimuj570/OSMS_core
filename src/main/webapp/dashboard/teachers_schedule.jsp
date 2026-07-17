@@ -119,9 +119,18 @@ body {
 		for (Teacher t : state.teachers.values()) {
 		%>
 		<section class="routine-section">
+		<div style="display: flex;justify-content: space-between; background-color: #5c0931">
+		
 			<h2>
 				Teacher:
 				<%=t.name%></h2>
+				<h2>
+				|
+				</h2>
+				<h2>
+				 Max Weekly Hours Load <%=state.teacherWeeklyLoad.get(t.id) %>/<%=t.maxSlotHours %>
+				</h2>
+		</div>
 			<table class="routine-table">
 				<thead>
 					<tr>

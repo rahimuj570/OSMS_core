@@ -28,7 +28,37 @@ public class CSPSolver {
 		return bestAssignment;
 	}
 
+	
+	
+	
+	
+	
+	///////////////FOR PARTIAL TBA RESULT
+	///
+	///
+	///
+	
+	private static int bestPartialAssignedCount = 0;
+
+	private static int currentAssignedCount(CSPState s) {
+
+	    int count = 0;
+
+	    for (Variable v : s.variables.values()) {
+	        if (v.assigned)
+	            count++;
+	    }
+
+	    return count;
+	}
+	//////////////////////////
+	
+	
+	
+	
+	
 	public static void reset() {
+		bestPartialAssignedCount = 0;
 		shouldTakeFirstSolution = false;
 		isSolverRunning = false;
 		routineGenerationPercentage = 0;
@@ -52,9 +82,55 @@ public class CSPSolver {
 			divisor = 500_000;
 		}
 	}
+	
+	
+	
+	
+	public static boolean startSolve(CSPState s) {
+System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution);
+	    isSolverRunning = true;
+	    routineGenerationPercentage = 0;
+
+	    boolean result = solve(s);
+
+	    isSolverRunning = false;
+	    routineGenerationPercentage = 100;
+
+	    return result;
+	}
+	
+	
 
 	public static boolean solve(CSPState s) {
 
+//		System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa==="+routineGenerationPercentage);
+		
+		
+		
+		
+		/////// FOR TBA RESULT
+		///
+		///
+		int assignedCount = currentAssignedCount(s);
+		
+		if (assignedCount > bestPartialAssignedCount) {
+			System.out.println("sssssssssssssssss ="+assignedCount);
+			
+			bestPartialAssignedCount = assignedCount;
+			
+			bestAssignment.clear();
+			
+			for (Variable var : s.variables.values()) {
+				
+				if (var.assigned) {
+					bestAssignment.put(var.id, var.assignedValue);
+				}
+			}
+		}
+		///
+		///
+		///
+		///
 		if (++nodes > MAX_NODES) {
 			Main.timeout = true;
 			isSolverRunning = false;
@@ -67,9 +143,9 @@ public class CSPSolver {
 		}
 
 		if (allAssigned(s)) {
+//			System.out.println("passssssssssssssssssspasssssss");
 			if (!validateLabOriented(s) || !validateLab(s))
 				return false;
-
 			int score = SoftConstraints.score(s);
 			if (score < bestScore) {
 				bestScore = score;
@@ -135,10 +211,10 @@ public class CSPSolver {
 			return false;
 
 		// // HARD: preferred teacher
-		if (outsidePreferred.equalsIgnoreCase("no")) {
-			if (c.preferredTeachers != null && !c.preferredTeachers.contains(val.teacherId))
-				return false;
-		}
+//		if (outsidePreferred.equalsIgnoreCase("no")) {
+//			if (c.preferredTeachers != null && !c.preferredTeachers.contains(val.teacherId))
+//				return false;
+//		}
 
 		if (!t.availability.get(val.day)) {
 			return false;
@@ -186,27 +262,27 @@ public class CSPSolver {
 		}
 
 		// Must be same teacher forr a specific section fpr same course
-		String k = key(v);
-		int assignedTeacher = s.courseSectionTeacher.getOrDefault(k, 0);
-
-		if (assignedTeacher != 0 && assignedTeacher != val.teacherId) {
-			return false;
-		}
+//		String k = key(v);
+//		int assignedTeacher = s.courseSectionTeacher.getOrDefault(k, 0);
+//
+//		if (assignedTeacher != 0 && assignedTeacher != val.teacherId) {
+//			return false;
+//		}
 		
 		// Teacher weekly limit
-		int currentLoad = s.teacherWeeklyLoad.get(val.teacherId);
+		float currentLoad = s.teacherWeeklyLoad.get(val.teacherId);
 
-		if (currentLoad + (val.slotCount*30)/60 > t.maxSlotHours) {
-		    return false;
+		if (currentLoad + (float)(val.slotCount*30.0)/(float)60.0 > t.maxSlotHours) {
+//		    return false;
 		}
 
 		return true;
 	}
 
 	/// HEleper FOR courseSectionTeacher
-	private static String key(Variable v) {
-		return v.section.id + "_" + v.course.id;
-	}
+//	private static String key(Variable v) {
+//		return v.section.id + "_" + v.course.id;
+//	}
 
 	private static void assign(CSPState s, Variable v, Value val) {
 		v.assigned = true;
@@ -217,17 +293,17 @@ public class CSPSolver {
 		s.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
 		s.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
 
-		String k = key(v);
+//		String k = key(v);
 
-		// assign teacher if first time
-		if (!s.courseSectionTeacher.containsKey(k)) {
-			s.courseSectionTeacher.put(k, val.teacherId);
-		}
+//		// assign teacher if first time
+//		if (!s.courseSectionTeacher.containsKey(k)) {
+//			s.courseSectionTeacher.put(k, val.teacherId);
+//		}
 		
 		// NEW
 	    s.teacherWeeklyLoad.put(
 	        val.teacherId,
-	        s.teacherWeeklyLoad.get(val.teacherId) + (val.slotCount*30)/60
+	        s.teacherWeeklyLoad.get(val.teacherId) + (float)((val.slotCount*30.0)/60.0)
 	    );
 	}
 
@@ -239,28 +315,28 @@ public class CSPSolver {
 		v.assigned = false;
 		v.assignedValue = null;
 
-		String k = key(v);
+//		String k = key(v);
 
 		// check if this was the last variable using this teacher
-		boolean stillUsed = false;
-
-		for (Variable other : s.variables.values()) {
-			if (other == v || !other.assigned)
-				continue;
-
-			if (key(other).equals(k)) {
-				stillUsed = true;
-				break;
-			}
-		}
-
-		if (!stillUsed) {
-			s.courseSectionTeacher.remove(k);
-		}
+//		boolean stillUsed = false;
+//
+//		for (Variable other : s.variables.values()) {
+//			if (other == v || !other.assigned)
+//				continue;
+//
+//			if (key(other).equals(k)) {
+//				stillUsed = true;
+//				break;
+//			}
+//		}
+//
+//		if (!stillUsed) {
+//			s.courseSectionTeacher.remove(k);
+//		}
 		
 		 s.teacherWeeklyLoad.put(
 			        val.teacherId,
-			        s.teacherWeeklyLoad.get(val.teacherId) - (val.slotCount*30)/60
+			        s.teacherWeeklyLoad.get(val.teacherId) - (float)((val.slotCount*30.0)/60.0)
 			    );
 	}
 
@@ -290,5 +366,9 @@ public class CSPSolver {
 			}
 		}
 		return !usedLab.containsValue(false);
+	}
+	
+	public static boolean isAllLabFitted(CSPState s) {
+		return validateLab(s) && validateLabOriented(s);
 	}
 }

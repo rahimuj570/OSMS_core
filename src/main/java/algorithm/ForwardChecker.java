@@ -21,8 +21,13 @@ public class ForwardChecker {
 				}
 			}
 			
-			if (n.domain.isEmpty())
+			if (n.domain.isEmpty()) {
+				System.out.println(
+					    "Domain wiped out: " +
+					    n.id
+					);				
 				return null;
+			}
 		}
 		return removed;
 	}

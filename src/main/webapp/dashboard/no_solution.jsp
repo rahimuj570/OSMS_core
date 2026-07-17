@@ -141,12 +141,34 @@ for (var a : Main.state.variables.values()) {
 	<main>
 		<section class="routine-section">
 			<h2>Status</h2>
-			<ul class="status-list">
-				<li><strong>Message:</strong> NO solution exists</li>
-				<li><strong>Solved:</strong> false</li>
-				<li><strong>Timeout:</strong> true</li>
-				<li><strong>BestAssignment size:</strong> <%=CSPSolver.getBestAssignment().size() %></li>
-			</ul>
+
+<%
+boolean partialSolution =
+    CSPSolver.getBestAssignment().size() > 0;
+%>
+
+<ul class="status-list">
+
+<% if(Main.timeout && partialSolution){ %>
+
+    <li><strong>Status:</strong> Partial Solution Generated</li>
+    <li><strong>Reason:</strong> Search timeout reached before completion</li>
+    <li><strong>Assigned Classes:</strong> <%=CSPSolver.getBestAssignment().size()%></li>
+    <li><a href="tba_generated_routine.jsp"><button class="print-btn"> View TBA Partial Routinw</button></a></li>
+
+<% } else if(Main.timeout){ %>
+
+    <li><strong>Status:</strong> Timeout</li>
+    <li><strong>Reason:</strong> No partial solution found before timeout</li>
+
+<% } else { %>
+
+    <li><strong>Status:</strong> No Feasible Solution</li>
+    <li><strong>Reason:</strong> Constraints cannot be satisfied</li>
+
+<% } %>
+
+</ul>
 		</section>
 
 		<section class="routine-section">
@@ -158,7 +180,7 @@ for (var a : Main.state.variables.values()) {
 				</tr>
 				<tr>
 					<th>Assigned Variables</th>
-					<td>190</td>
+					<td><%=countAssigned %></td>
 				</tr>
 				<tr>
 					<th>Unassigned Variables</th>

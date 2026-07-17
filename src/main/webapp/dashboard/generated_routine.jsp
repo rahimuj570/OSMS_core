@@ -1,3 +1,4 @@
+<%@page import="algorithm.CSPSolver"%>
 <%@page import="local_db.TeacherData"%>
 <%@page import="java.util.Comparator"%>
 <%@page import="algorithm.Value"%>
@@ -104,6 +105,15 @@ body {
 <body>
 	<header class="routine-header">
 		<h1>Final Routine</h1>
+		<%
+		if(CSPSolver.isAllLabFitted(Main.state)==false){ %>
+		<p style="background-color: #fff9d9;
+  color: red;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;">
+Some Lab Oriented Courses did not get Lab room due to insufficient room		
+		</p><%} %>
 		<%
 		if (Main.isComplete == false) {
 		%>

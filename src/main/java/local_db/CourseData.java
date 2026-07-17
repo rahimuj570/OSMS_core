@@ -234,7 +234,7 @@ public class CourseData {
 		courses.clear();
 		try {
 			Connection con = ConnectionProvider.getCon();
-			PreparedStatement courseStmt = con.prepareStatement("select * from courses");
+			PreparedStatement courseStmt = con.prepareStatement("select * from courses order by course_id");
 			ResultSet courseRes = courseStmt.executeQuery();
 
 			while (courseRes.next()) {

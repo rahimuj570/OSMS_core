@@ -50,6 +50,7 @@ public class GenerateRoutineServlet extends HttpServlet {
 			CSPSolver.isSolverRunning = true;
 			new Thread(() -> {
 				CSPSolver.efficiency = efficiency;
+				CSPSolver.outsidePreferred=outsidePreferred;
 				Main.main(null);
 				CSPSolver.isSolverRunning = false;
 			}).start();

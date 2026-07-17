@@ -70,7 +70,15 @@ public class Main {
 // check availability
 					if (!t.availability.get(day))
 						continue;
-
+//////////////////////////////////////////////////////////////////////////////////////
+					if (!v.course.preferredTeachers.contains(t.id)) {
+						continue;
+					}
+					////////////////////////////////////////////////////////////////////////
+					///
+					///
+					///
+					///
 					for (Room r : rooms.values()) {
 
 						if (!roomAllowed(v.course.type, r))
@@ -155,8 +163,8 @@ public class Main {
 	}
 
 	public static boolean isComplete = false;
-	public static Map<String, Boolean> inCompleteLabOriented= new HashMap<String, Boolean>();
-	public static boolean isLabOrientedIncomplete =false;
+	public static Map<String, Boolean> inCompleteLabOriented = new HashMap<String, Boolean>();
+	public static boolean isLabOrientedIncomplete = false;
 
 	public static void main(String[] args) {
 
@@ -185,7 +193,7 @@ public class Main {
 		buildNeighbors(vars);
 
 		CSPSolver.reset();
-		boolean solved = CSPSolver.solve(state);
+		boolean solved = CSPSolver.startSolve(state);
 
 		isComplete = false;
 		if (CSPSolver.getBestAssignment().size() == state.variables.size()) {
@@ -219,25 +227,28 @@ public class Main {
 			}
 
 			// check incomplete labOriented
-		try {	if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
-				inCompleteLabOriented.putIfAbsent(a.section.id+"_"+a.course.id, false);
-				Room r = state.rooms.get(a.assignedValue.roomId);
-				if (r.type == RoomType.LAB)
-					inCompleteLabOriented.put(a.section.id+"_"+a.course.id, true);
-			}}catch (Exception e) {
+			try {
+				if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
+					inCompleteLabOriented.putIfAbsent(a.section.id + "_" + a.course.id, false);
+					Room r = state.rooms.get(a.assignedValue.roomId);
+					if (r.type == RoomType.LAB)
+						inCompleteLabOriented.put(a.section.id + "_" + a.course.id, true);
+				}
+			} catch (Exception e) {
 				// TODO: handle exception
 			}
 		}
-	isLabOrientedIncomplete = inCompleteLabOriented.containsValue(false);
-	System.out.println(isLabOrientedIncomplete);
-	for(String a: inCompleteLabOriented.keySet()) {
-		if(inCompleteLabOriented.get(a)==false) {
-			System.out.println(a);
-		};
-	}
+		isLabOrientedIncomplete = inCompleteLabOriented.containsValue(false);
+		System.out.println(isLabOrientedIncomplete);
+		for (String a : inCompleteLabOriented.keySet()) {
+			if (inCompleteLabOriented.get(a) == false) {
+				System.out.println(a);
+			}
+			;
+		}
 
 //		 restore best found assignment
-		if (!CSPSolver.getBestAssignment().isEmpty()) {
+		if (CSPSolver.getBestAssignment().size()==state.variables.size()) {
 
 			// clear occupation maps first
 			state.clearOccupations();
@@ -247,12 +258,22 @@ public class Main {
 				v.assignedValue = CSPSolver.getBestAssignment().get(v.id);
 
 				Value val = v.assignedValue;
-
+if(val==null)continue;
 				state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
 				state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+
+//				if (val.teacherId != PartialRoutineBuilder.TBA_TEACHER) {
+//					state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
+//				}
+//
+//				if (!PartialRoutineBuilder.TBA_ROOM.equals(val.roomId)) {
+//					state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+//				}
+//
 				state.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
 			}
-
+//
+//			PartialRoutineBuilder.build(state);
 			solved = true;
 		}
 
@@ -263,7 +284,7 @@ public class Main {
 //		CSVTeacherScheduleExporter.export(state, "teacher_shedules.csv");
 
 		if (CSPSolver.getBestAssignment().isEmpty()) {
-			CSPSolver.routineGenerationPercentage=100;
+			CSPSolver.routineGenerationPercentage = 100;
 			System.out.println("Total Variable= " + state.variables.size());
 			System.out.println("Total Assigned Variable= " + countAssigned);
 			System.out.println("Total Unassigned Variable= " + countUnassigned);
@@ -276,7 +297,7 @@ public class Main {
 
 		} else {
 			System.out.println("⚠️ Timeout reached — best found solution used");
-			RoutinePrinter.print(state);
+//			RoutinePrinter.print(state);
 		}
 
 	}
