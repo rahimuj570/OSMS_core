@@ -40,22 +40,45 @@ public class SoftConstraints {
 		return penalty;
 	}
 
+//	public static int teacherLoadPenalty(CSPState s) {
+//		Map<Integer, Integer> count = new HashMap<>();
+//		int penalty = 0;
+//
+//		for (Variable v : s.variables.values()) {
+//			int t = v.assignedValue.teacherId;
+//
+//			int c = count.getOrDefault(t, 0) + 1;
+//			count.put(t, c);
+//
+//			if (c > 6) {
+//				penalty += (c - 6) * (c - 6);
+//			}
+//		}
+//
+//		return penalty;
+//	}
+	
 	public static int teacherLoadPenalty(CSPState s) {
-		Map<Integer, Integer> count = new HashMap<>();
-		int penalty = 0;
 
-		for (Variable v : s.variables.values()) {
-			int t = v.assignedValue.teacherId;
+	    Map<Integer, Integer> count = new HashMap<>();
+	    int penalty = 0;
 
-			int c = count.getOrDefault(t, 0) + 1;
-			count.put(t, c);
+	    for (Variable v : s.variables.values()) {
 
-			if (c > 6) {
-				penalty += (c - 6) * (c - 6);
-			}
-		}
+	        if (!v.assigned || v.assignedValue == null)
+	            continue;
 
-		return penalty;
+	        int teacherId = v.assignedValue.teacherId;
+
+	        int current = count.getOrDefault(teacherId, 0) + 1;
+	        count.put(teacherId, current);
+
+	        if (current > 6) {
+	            penalty += (current - 6) * (current - 6);
+	        }
+	    }
+
+	    return penalty;
 	}
 
 	private static int preferredTeacherPenalty(CSPState s) {

@@ -10,6 +10,8 @@ public class Variable {
 	public Course course;
 	public Section section;
 	
+	public boolean skipped = false;
+	
 	public List<Value> domain = new ArrayList<>();
 	public boolean assigned = false;
 	public Value assignedValue = null;

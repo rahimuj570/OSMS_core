@@ -5,10 +5,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import algorithm.CSPState;
@@ -18,105 +18,165 @@ import algorithm.Variable;
 import entity.Course;
 import entity.Teacher;
 
-/**
- * Servlet implementation class TeacherScheduleCSVExportServlet
- */
 @WebServlet("/TeacherScheduleCSVExportServlet")
 public class TeacherScheduleCSVExportServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
 
-	public static final String[] DAYS = { "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-			"Friday" };
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public TeacherScheduleCSVExportServlet() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public static final String[] DAYS = {
+            "Saturday",
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday"
+    };
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		CSPState state = Main.state;
+    public TeacherScheduleCSVExportServlet() {
+        super();
+    }
 
-		// Download setup
-		response.setContentType("text/csv");
-		response.setHeader("Content-Disposition", "attachment; filename=teacher_routine.csv");
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-		PrintWriter writer = response.getWriter();
+        CSPState state = Main.state;
 
-		List<Variable> vars = new ArrayList<>(state.variables.values());
+        response.setContentType("text/csv");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=teacher_schedule.csv");
 
-		// sort like your JSP
-		vars.sort(Comparator.comparingInt((Variable v) -> v.assignedValue.day)
-				.thenComparingInt(v -> v.assignedValue.startSlot));
+        PrintWriter writer = response.getWriter();
 
-		for (Teacher t : state.teachers.values()) {
+        List<Variable> vars = new ArrayList<>(state.variables.values());
 
-			// ===== TEACHER HEADER =====
-			writer.append("Teacher: ").append(t.name)
-					.append(",Max Weekly Hours: " + state.teacherWeeklyLoad.get(t.id) + "/" + t.maxSlotHours)
-					.append("\n");
+        // Safe sorting
+        vars.sort((a, b) -> {
 
-			// ===== COLUMN HEADER =====
-			writer.append("Day,Time,Course,Section,Room\n");
+            if (!a.assigned || a.assignedValue == null) {
 
-			for (Variable v : vars) {
+                if (!b.assigned || b.assignedValue == null)
+                    return a.id.compareTo(b.id);
 
-				if (!v.assigned || v.assignedValue == null)
-					continue;
+                return 1;
+            }
 
-				if (v.assignedValue.teacherId != t.id)
-					continue;
+            if (!b.assigned || b.assignedValue == null)
+                return -1;
 
-				Value val = v.assignedValue;
-				Course c = v.course;
+            int cmp = Integer.compare(
+                    a.assignedValue.day,
+                    b.assignedValue.day);
 
-				String day = DAYS[val.day];
-				String time = timeRange(val.startSlot, val.slotCount);
+            if (cmp != 0)
+                return cmp;
 
-				writer.append(day).append(",").append("\"").append(time).append("\"").append(",").append(c.id)
-						.append(",").append(v.section.id).append(",").append(val.roomId).append("\n");
-			}
+            return Integer.compare(
+                    a.assignedValue.startSlot,
+                    b.assignedValue.startSlot);
+        });
 
-			writer.append("\n=========================\n\n");
-		}
+        for (Teacher teacher : state.teachers.values()) {
 
-		writer.flush();
-		writer.close();
-	}
+            float load = state.teacherWeeklyLoad.get(teacher.id);
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
+            float percent = 0;
 
-	public static String timeRange(int startSlot, int slotCount) {
+            if (teacher.maxSlotHours > 0) {
+                percent = (load / teacher.maxSlotHours) * 100f;
+            }
 
-		int startMinutes = startSlot * 30;
-		int endMinutes = startMinutes + (slotCount * 30);
+            String status = "Normal";
 
-		int startHour = 9 + startMinutes / 60;
-		int startMin = startMinutes % 60;
+            if (percent >= 100) {
+                status = "Overloaded";
+            } else if (percent >= 80) {
+                status = "Near Limit";
+            }
 
-		int endHour = 9 + endMinutes / 60;
-		int endMin = endMinutes % 60;
+            writer.println("==============================================================");
+            writer.println("Teacher Name," + teacher.name);
+            writer.println("Teacher ID," + teacher.id);
+            writer.println("Weekly Load,"
+                    + String.format("%.1f", load)
+                    + " / "
+                    + teacher.maxSlotHours
+                    + " Hours");
+            writer.println("Status," + status);
+            writer.println("==============================================================");
 
-		return formatTime(startHour, startMin) + " - " + formatTime(endHour, endMin);
-	}
+            writer.println("Day,Time,Course,Section,Room");
 
-	private static String formatTime(int hour, int min) {
-		return String.format("%02d:%02d", hour, min);
-	}
+            int assignedCount = 0;
 
+            for (Variable v : vars) {
+
+                if (!v.assigned || v.assignedValue == null)
+                    continue;
+
+                if (v.assignedValue.teacherId != teacher.id)
+                    continue;
+
+                assignedCount++;
+
+                Value val = v.assignedValue;
+                Course c = v.course;
+
+                writer.append(DAYS[val.day]).append(",")
+                        .append("\"")
+                        .append(timeRange(val.startSlot, val.slotCount))
+                        .append("\"")
+                        .append(",")
+                        .append(c.id)
+                        .append(",")
+                        .append(v.section.id)
+                        .append(",")
+                        .append(val.roomId)
+                        .append("\n");
+            }
+
+            if (assignedCount == 0) {
+                writer.println("No Classes Assigned");
+            }
+
+            writer.println();
+            writer.println("Total Assigned Classes," + assignedCount);
+            writer.println();
+            writer.println();
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+            throws ServletException, IOException {
+
+        doGet(request, response);
+    }
+
+    public static String timeRange(int startSlot, int slotCount) {
+
+        int startMinutes = startSlot * 30;
+        int endMinutes = startMinutes + (slotCount * 30);
+
+        int startHour = 9 + startMinutes / 60;
+        int startMin = startMinutes % 60;
+
+        int endHour = 9 + endMinutes / 60;
+        int endMin = endMinutes % 60;
+
+        return formatTime(startHour, startMin)
+                + " - "
+                + formatTime(endHour, endMin);
+    }
+
+    private static String formatTime(int hour, int min) {
+
+        return String.format("%02d:%02d", hour, min);
+    }
 }

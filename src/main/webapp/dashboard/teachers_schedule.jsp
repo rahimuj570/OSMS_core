@@ -6,184 +6,632 @@
 <%@page import="algorithm.RoutinePrinter"%>
 <%@page import="algorithm.Variable"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="entity.Section"%>
 <%@page import="algorithm.Main"%>
 <%@page import="algorithm.CSPState"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+    pageEncoding="UTF-8"%>
 <%@ page errorPage="no_solution.jsp"%>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
-<title>Generated Teachers Schedule</title>
-<style type="text/css">
-body {
-	font-family: Arial, sans-serif;
-	background-color: #fff;
-	color: #333;
-	padding: 20px;
+<title>Teacher Schedule</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
 }
 
-.routine-header {
-	text-align: center;
-	background-color: #5c0931;
-	color: white;
-	padding: 20px;
-	border-radius: 8px;
-	margin-bottom: 30px;
+body{
+    margin:0;
+    padding:25px;
+    background:#f5f7fb;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#333;
 }
 
-.routine-section {
-	margin-bottom: 40px;
+.header{
+
+    background:#5c0931;
+    color:white;
+
+    border-radius:12px;
+
+    padding:22px;
+
+    margin-bottom:25px;
+
+    text-align:center;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
 }
 
-.routine-section h2 {
-	background-color: #5c0931;
-	color: white;
-	padding: 10px;
-	border-radius: 4px 4px 0 0;
+.header h1{
+
+    margin:0;
+
+    font-size:34px;
+
 }
 
-.routine-table {
-	width: 100%;
-	border-collapse: collapse;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.header p{
+
+    margin-top:10px;
+
+    opacity:.9;
+
+    font-size:16px;
+
 }
 
-.routine-table th, .routine-table td {
-	border: 1px solid #ddd;
-	padding: 12px;
-	text-align: left;
+.summary{
+
+    display:flex;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:30px;
+
 }
 
-.routine-table th {
-	background-color: #5c0931;
-	color: white;
+.summary-card{
+
+    flex:1;
+
+    min-width:220px;
+
+    background:white;
+
+    border-radius:10px;
+
+    padding:18px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
 }
 
-.routine-table tr:nth-child(even) {
-	background-color: #f9f9f9;
+.summary-title{
+
+    color:#777;
+
+    font-size:14px;
+
 }
 
-.routine-table tr:hover {
-	background-color: #f1f1f1;
+.summary-value{
+
+    margin-top:8px;
+
+    font-size:32px;
+
+    font-weight:bold;
+
+    color:#5c0931;
+
 }
 
-/* Print Button */
-.print-btn {
-	background-color: #5c0931;
-	color: white;
-	border: none;
-	padding: 12px 20px;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 16px;
-	display: block;
-	margin: 20px auto;
+.teacher-section{
+
+    margin-bottom:45px;
+
+    background:white;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
 }
 
-.print-btn:hover {
-	background-color: #7a1145;
+.teacher-header{
+
+    background:#5c0931;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 25px;
+
+    flex-wrap:wrap;
+
 }
 
-/* Print Styles */
-@media print {
-	* {
-		-webkit-print-color-adjust: exact !important; /* Chrome, Safari */
-		print-color-adjust: exact !important; /* Firefox */
-		color-adjust: exact !important; /* Legacy */
-	}
-	.print-btn {
-		display: none;
-	}
+.teacher-name{
+
+    font-size:24px;
+
+    font-weight:bold;
+
 }
+
+.teacher-load{
+
+    font-size:17px;
+
+}
+
+.progress{
+
+    width:260px;
+
+    height:12px;
+
+    background:#d8d8d8;
+
+    border-radius:50px;
+
+    overflow:hidden;
+
+    margin-top:8px;
+
+}
+
+.progress-bar{
+
+    height:100%;
+
+    background:#33b249;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#5c0931;
+
+    color:white;
+
+    padding:13px;
+
+    text-align:left;
+
+}
+
+td{
+
+    padding:12px;
+
+    border-bottom:1px solid #ececec;
+
+}
+
+tbody tr:nth-child(even){
+
+    background:#fafafa;
+
+}
+
+tbody tr:hover{
+
+    background:#f3f3f3;
+
+}
+
+.day{
+
+    font-weight:bold;
+
+}
+
+.course{
+
+    font-weight:bold;
+
+    color:#5c0931;
+
+}
+
+.room{
+
+    font-weight:bold;
+
+}
+
+.time{
+
+    color:#444;
+
+}
+
+.empty{
+
+    padding:30px;
+
+    text-align:center;
+
+    color:#999;
+
+    font-style:italic;
+
+}
+
+.btn-area{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:18px;
+
+    flex-wrap:wrap;
+
+    margin-top:40px;
+
+}
+
+.btn{
+
+    background:#5c0931;
+
+    color:white;
+
+    border:none;
+
+    padding:14px 24px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    text-decoration:none;
+
+}
+
+.btn:hover{
+
+    background:#7a1145;
+
+}
+
+@media print{
+
+    .btn-area{
+
+        display:none;
+
+    }
+
+    body{
+
+        background:white;
+
+        padding:0;
+
+    }
+
+}
+
 </style>
 
 </head>
+
 <body>
-	<header class="routine-header">
-		<h1>Teacher's Schedule</h1>
-		
-	</header>
 
-	<main>
-		<%
-		CSPState state = Main.state;
-		ArrayList<Variable> vars = new ArrayList<>(state.variables.values());
-		// Sort by day → startSlot
-		vars.sort(
-				Comparator.comparingInt((Variable v) -> v.assignedValue.day).thenComparingInt(v -> v.assignedValue.startSlot));
+<%
 
-		for (Teacher t : state.teachers.values()) {
-		%>
-		<section class="routine-section">
-		<div style="display: flex;justify-content: space-between; background-color: #5c0931">
-		
-			<h2>
-				Teacher:
-				<%=t.name%></h2>
-				<h2>
-				|
-				</h2>
-				<h2>
-				 Max Weekly Hours Load <%=state.teacherWeeklyLoad.get(t.id) %>/<%=t.maxSlotHours %>
-				</h2>
-		</div>
-			<table class="routine-table">
-				<thead>
-					<tr>
-						<th>Day</th>
-						<th>Time</th>
-						<th>Course</th>
-						<th>Section</th>
-						<th>Room</th>
-					</tr>
-				</thead>
-				<tbody>
-					<%
-					for (Variable v : vars) {
+CSPState state = Main.state;
 
-						if (v.assignedValue.teacherId != t.id) {
-							continue;
-						}
-						Value val = v.assignedValue;
-						Course c = v.course;
+ArrayList<Variable> vars = new ArrayList<>(state.variables.values());
 
-						String day = RoutinePrinter.DAYS[val.day];
-						String time = RoutinePrinter.timeRange(val.startSlot, val.slotCount);
-					%>
-					<tr>
-						<td><%=day%></td>
-						<td><%=time%></td>
-						<td><%=v.course.id%></td>
-						<td><%=v.section.id%></td>
-						<td><%=val.roomId%></td>
-					</tr>
+vars.removeIf(v -> !v.assigned || v.assignedValue == null);
 
-					<%
-					}
-					%>
-				</tbody>
-			</table>
-		</section>
-		<%
-		}
-		%>
+vars.sort(
+
+Comparator
+.comparingInt((Variable v)->v.assignedValue.day)
+.thenComparingInt(v->v.assignedValue.startSlot)
+
+);
+
+%>
+
+<div class="header">
+
+<h1>Teacher Schedule</h1>
+
+<p>
+Automatically generated teaching schedule for all instructors
+</p>
+
+</div>
+
+<%
+
+int totalTeachers = state.teachers.size();
+int totalAssigned = vars.size();
+
+float totalHours = 0f;
+
+for (Teacher t : state.teachers.values()) {
+    totalHours += state.teacherWeeklyLoad.get(t.id);
+}
+
+%>
+
+<div class="summary">
+
+    <div class="summary-card">
+        <div class="summary-title">
+            Total Teachers
+        </div>
+
+        <div class="summary-value">
+            <%=totalTeachers%>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="summary-title">
+            Assigned Classes
+        </div>
+
+        <div class="summary-value">
+            <%=totalAssigned%>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="summary-title">
+            Total Teaching Hours
+        </div>
+
+        <div class="summary-value">
+            <%=String.format("%.1f", totalHours)%> hrs
+        </div>
+    </div>
+
+</div>
 
 
-		<!-- Print Button -->
-		
-			<div style="display: flex;
-  justify-content: center;
-  gap: 18px;">	<a><button class="print-btn" onclick="window.print()">🖨️ Print
-			Schedule</button></a><a href="<%=request.getContextPath()%>/TeacherScheduleCSVExportServlet"><button class="print-btn">📥 Download As CSV</button></a></div>
-			
-			
-			
-			<a href="generated_routine.jsp"><button class="print-btn">Section Routine</button></a>
-		<a href="courses.jsp"><button class="print-btn">🏠 Home</button></a>
-	</main>
+<%
+
+for(Teacher t : state.teachers.values()){
+
+    float load = state.teacherWeeklyLoad.get(t.id);
+
+    float percent = 0;
+
+    if(t.maxSlotHours>0){
+        percent = (load/t.maxSlotHours)*100f;
+    }
+
+    if(percent>100)
+        percent=100;
+
+    String color="#33b249";
+    String status="Normal";
+
+    if(percent>=80){
+        color="#f4b400";
+        status="Near Limit";
+    }
+
+    if(percent>=100){
+        color="#d93025";
+        status="Overloaded";
+    }
+
+%>
+
+<div class="teacher-section">
+
+<div class="teacher-header">
+
+<div>
+
+<div class="teacher-name">
+
+👨‍🏫 <%=t.name%>
+
+</div>
+
+<div style="margin-top:8px;">
+
+Weekly Load :
+<b>
+
+<%=String.format("%.1f",load)%> / <%=t.maxSlotHours%> hrs
+
+</b>
+
+&nbsp;&nbsp;
+
+(<%=status%>)
+
+</div>
+
+<div class="progress">
+
+<div class="progress-bar"
+
+style="width:<%=percent%>%;
+background:<%=color%>;">
+
+</div>
+
+</div>
+
+</div>
+
+<div style="font-size:18px;">
+
+Teacher ID :
+<b><%=t.id%></b>
+
+</div>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th width="18%">Day</th>
+
+<th width="25%">Time</th>
+
+<th width="22%">Course</th>
+
+<th width="20%">Section</th>
+
+<th width="15%">Room</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<%
+
+boolean found=false;
+
+for(Variable v : vars){
+
+    if(v.assignedValue.teacherId!=t.id)
+        continue;
+
+    found=true;
+
+    Value val=v.assignedValue;
+
+    String day=RoutinePrinter.DAYS[val.day];
+
+    String time=RoutinePrinter.timeRange(
+            val.startSlot,
+            val.slotCount
+    );
+
+%>
+
+<tr>
+
+<td class="day">
+<%=day%>
+</td>
+
+<td class="time">
+<%=time%>
+</td>
+
+<td class="course">
+<%=v.course.id%>
+</td>
+
+<td>
+<%=v.section.id%>
+</td>
+
+<td class="room">
+<%=val.roomId%>
+</td>
+
+</tr>
+
+<%
+
+}
+
+if(!found){
+
+%>
+
+<tr>
+
+<td colspan="5" class="empty">
+
+No classes assigned for this teacher.
+
+</td>
+
+</tr>
+
+<%
+
+}
+
+%>
+
+</tbody>
+
+</table>
+
+</div>
+
+<%
+
+}
+
+%>
+
+<div class="btn-area">
+
+    <button class="btn" onclick="window.print()">
+        🖨️ Print Schedule
+    </button>
+
+    <a href="<%=request.getContextPath()%>/TeacherScheduleCSVExportServlet"
+       class="btn">
+        📥 Download CSV
+    </a>
+
+    <a href="generated_routine.jsp"
+       class="btn">
+        📚 Section Routine
+    </a>
+
+    <a href="courses.jsp"
+       class="btn">
+        🏠 Home
+    </a>
+
+</div>
+
+<br>
+<br>
+
+<div style="
+text-align:center;
+color:#666;
+font-size:14px;
+padding:20px 0;
+border-top:1px solid #ddd;
+margin-top:40px;
+">
+
+Generated by
+<b>University Routine Generator</b>
+
+<br><br>
+
+Printed on
+
+<%=new java.text.SimpleDateFormat("dd MMM yyyy  hh:mm a").format(new java.util.Date())%>
+
+</div>
+
 </body>
 </html>

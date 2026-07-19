@@ -10,7 +10,6 @@ import local_db.TeacherData;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import algorithm.CSPState;
@@ -20,114 +19,165 @@ import algorithm.Variable;
 import entity.Course;
 import entity.Section;
 
-/**
- * Servlet implementation class ClassCSVExportServlet
- */
 @WebServlet("/ClassCSVExportServlet")
 public class ClassCSVExportServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
+
+    private static final long serialVersionUID = 1L;
+
     public ClassCSVExportServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
-    
+
     public static final String[] DAYS = {
-            "Saturday", "Sunday", "Monday", "Tuesday",
-            "Wednesday", "Thursday", "Friday"
+            "Saturday",
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday"
     };
 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		 CSPState state = Main.state;
+        CSPState state = Main.state;
 
-	        // 🔥 Download setup
-	        response.setContentType("text/csv");
-	        response.setHeader("Content-Disposition", "attachment; filename=section_routine.csv");
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition",
+                "attachment; filename=section_routine.csv");
 
-	        PrintWriter writer = response.getWriter();
+        PrintWriter writer = response.getWriter();
 
-	        List<Variable> vars = new ArrayList<>(state.variables.values());
+        List<Variable> vars = new ArrayList<>(state.variables.values());
 
-	        // Sort by day → startSlot
-	        vars.sort(Comparator
-	                .comparingInt((Variable v) -> v.assignedValue.day)
-	                .thenComparingInt(v -> v.assignedValue.startSlot));
+        // Assigned routines first, then TBA
+        vars.sort((a, b) -> {
 
-	        // Loop per section (same as your printer)
-	        for (Section section : state.sections.values()) {
+            if (!a.assigned || a.assignedValue == null) {
 
-	            String secId = section.id;
+                if (!b.assigned || b.assignedValue == null)
+                    return a.id.compareTo(b.id);
 
-	            // Section header
-	            writer.append("Class ").append(secId).append("\n");
+                return 1;
+            }
 
-	            // Column header
-	            writer.append("Course,Section,Teacher,Room,Day,Time\n");
+            if (!b.assigned || b.assignedValue == null)
+                return -1;
 
-	            for (Variable v : vars) {
+            int cmp = Integer.compare(
+                    a.assignedValue.day,
+                    b.assignedValue.day);
 
-	                if (!v.assigned || v.assignedValue == null)
-	                    continue;
+            if (cmp != 0)
+                return cmp;
 
-	                if (!v.section.id.equals(secId))
-	                    continue;
+            return Integer.compare(
+                    a.assignedValue.startSlot,
+                    b.assignedValue.startSlot);
+        });
 
-	                Value val = v.assignedValue;
-	                Course c = v.course;
+        for (Section section : state.sections.values()) {
 
-	                String day = DAYS[val.day];
-	                String time = timeRange(val.startSlot, val.slotCount);
+            String secId = section.id;
 
-	                writer.append(c.id).append(",")
-	                        .append(v.section.id).append(",")
-	                        .append(String.valueOf(TeacherData.teachers.get(val.teacherId).name)).append(",")
-	                        .append(val.roomId).append(",")
-	                        .append(day).append(",")
-	                        .append("\"").append(time).append("\"") // 🔥 important
-	                        .append("\n");
-	            }
+            writer.println("=================================================");
+            writer.println("SECTION : " + secId);
+            writer.println("=================================================");
 
-	            writer.append("\n=========================\n\n");
-	        }
+            writer.println(
+                    "Course,Section,Teacher,Room,Day,Time,Status");
 
-	        writer.flush();
-	        writer.close();
-	    
-	}
+            int assignedCount = 0;
+            int skippedCount = 0;
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-	
-	 public static String timeRange(int startSlot, int slotCount) {
+            for (Variable v : vars) {
 
-	        int startMinutes = startSlot * 30;
-	        int endMinutes = startMinutes + (slotCount * 30);
+                if (!v.section.id.equals(secId))
+                    continue;
 
-	        int startHour = 9 + startMinutes / 60;
-	        int startMin = startMinutes % 60;
+                // ---------- TBA ----------
+                if (!v.assigned || v.assignedValue == null) {
 
-	        int endHour = 9 + endMinutes / 60;
-	        int endMin = endMinutes % 60;
+                    skippedCount++;
 
-	        return formatTime(startHour, startMin) + " - " + formatTime(endHour, endMin);
-	    }
+                    writer.append(v.course.id).append(",")
+                            .append(v.section.id).append(",")
+                            .append("TBA,")
+                            .append("TBA,")
+                            .append("TBA,")
+                            .append("TBA,")
+                            .append("Not Assigned")
+                            .append("\n");
 
-	    private static String formatTime(int hour, int min) {
-	        return String.format("%02d:%02d", hour, min);
-	    }
-	
+                    continue;
+                }
 
+                assignedCount++;
+
+                Value val = v.assignedValue;
+                Course c = v.course;
+
+                String day = DAYS[val.day];
+                String time = timeRange(
+                        val.startSlot,
+                        val.slotCount);
+
+                writer.append(c.id).append(",")
+                        .append(v.section.id).append(",")
+                        .append(TeacherData.teachers
+                                .get(val.teacherId).name)
+                        .append(",")
+                        .append(val.roomId).append(",")
+                        .append(day).append(",")
+                        .append("\"")
+                        .append(time)
+                        .append("\"")
+                        .append(",")
+                        .append("Assigned")
+                        .append("\n");
+            }
+
+            writer.println();
+
+            writer.println("Assigned Classes," + assignedCount);
+            writer.println("Not Assigned," + skippedCount);
+
+            writer.println();
+            writer.println();
+        }
+
+        writer.flush();
+        writer.close();
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
+            throws ServletException, IOException {
+
+        doGet(request, response);
+    }
+
+    public static String timeRange(int startSlot, int slotCount) {
+
+        int startMinutes = startSlot * 30;
+        int endMinutes = startMinutes + slotCount * 30;
+
+        int startHour = 9 + startMinutes / 60;
+        int startMin = startMinutes % 60;
+
+        int endHour = 9 + endMinutes / 60;
+        int endMin = endMinutes % 60;
+
+        return formatTime(startHour, startMin)
+                + " - "
+                + formatTime(endHour, endMin);
+    }
+
+    private static String formatTime(int hour, int min) {
+
+        return String.format("%02d:%02d", hour, min);
+    }
 }

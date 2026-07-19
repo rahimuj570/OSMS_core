@@ -28,7 +28,11 @@ public class CSPSolver {
 		return bestAssignment;
 	}
 
-	
+	private static Set<String> bestSkipped = new HashSet<>();
+
+	public static Set<String> getBestSkipped() {
+	    return bestSkipped;
+	}
 	
 	
 	
@@ -55,10 +59,11 @@ public class CSPSolver {
 	
 	
 	
-	
-	
 	public static void reset() {
-		bestPartialAssignedCount = 0;
+		bestAssignment.clear();
+		bestSkipped.clear();
+		
+		bestPartialAssignedCount = -1;
 		shouldTakeFirstSolution = false;
 		isSolverRunning = false;
 		routineGenerationPercentage = 0;
@@ -93,6 +98,9 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 
 	    boolean result = solve(s);
 
+	    System.out.println("Best Assignment = " + bestAssignment.size());
+	    System.out.println("Best Skipped = " + bestSkipped.size());
+	    
 	    isSolverRunning = false;
 	    routineGenerationPercentage = 100;
 
@@ -102,38 +110,10 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 	
 
 	public static boolean solve(CSPState s) {
-
-//		System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaa==="+routineGenerationPercentage);
 		
 		
-		
-		
-		/////// FOR TBA RESULT
-		///
-		///
-		int assignedCount = currentAssignedCount(s);
-		
-		if (assignedCount > bestPartialAssignedCount) {
-			System.out.println("sssssssssssssssss ="+assignedCount);
-			
-			bestPartialAssignedCount = assignedCount;
-			
-			bestAssignment.clear();
-			
-			for (Variable var : s.variables.values()) {
-				
-				if (var.assigned) {
-					bestAssignment.put(var.id, var.assignedValue);
-				}
-			}
-		}
-		///
-		///
-		///
-		///
 		if (++nodes > MAX_NODES) {
 			Main.timeout = true;
-			isSolverRunning = false;
 			return true;
 		}
 
@@ -142,18 +122,63 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 			System.out.println("Visited nodes: " + nodes);
 		}
 
-		if (allAssigned(s)) {
-//			System.out.println("passssssssssssssssssspasssssss");
-			if (!validateLabOriented(s) || !validateLab(s))
-				return false;
-			int score = SoftConstraints.score(s);
-			if (score < bestScore) {
-				bestScore = score;
-				bestAssignment.clear();
-				for (Variable v : s.variables.values())
-					bestAssignment.put(v.id, v.assignedValue);
+		if (allDone(s)) {
+			//			System.out.println("passssssssssssssssssspasssssss");
+			  if (currentAssignedCount(s) == s.variables.size()) {
+
+			        if (!validateLabOriented(s) || !validateLab(s))
+			            return false;
+			    }
+
+			int assignedCount = currentAssignedCount(s);
+
+			if (assignedCount > bestPartialAssignedCount) {
+
+			    bestPartialAssignedCount = assignedCount;
+
+			    bestScore = SoftConstraints.score(s);
+
+			    bestAssignment.clear();
+			    bestSkipped.clear();
+
+			    for (Variable var : s.variables.values()) {
+
+			        if (var.assigned) {
+			            bestAssignment.put(var.id, var.assignedValue);
+			        }
+
+			        if (var.skipped) {
+			            bestSkipped.add(var.id);
+			        }
+			    }
+
+			}
+			else if (assignedCount == bestPartialAssignedCount) {
+
+			    int score = SoftConstraints.score(s);
+
+			    if(score < bestScore){
+
+			        bestScore = score;
+
+			        bestAssignment.clear();
+			        bestSkipped.clear();
+
+			        for(Variable v : s.variables.values()){
+
+			            if(v.assigned)
+			                bestAssignment.put(v.id,v.assignedValue);
+
+			            if(v.skipped)
+			                bestSkipped.add(v.id);
+			        }
+			    }
+			    
 			}
 
+			
+			
+			
 			if (shouldTakeFirstSolution) {
 				routineGenerationPercentage = 100;
 				return true;
@@ -163,9 +188,11 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 
 		Variable v = Heuristics.selectMRVDegree(s);
 
-		if (v == null || v.domain.isEmpty())
-			return false;
-
+//		if (v == null || v.domain.isEmpty())
+//			return false;
+if(v==null) {
+	return false;
+}
 		List<Value> values = new ArrayList<>(v.domain);
 
 		for (Value val : values) {
@@ -189,16 +216,32 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 
 			unassign(s, v, val);
 		}
-		isSolverRunning = false;
-		return false;
-	}
+	
 
-	private static boolean allAssigned(CSPState s) {
-		for (Variable v : s.variables.values())
-			if (!v.assigned)
-				return false;
-		return true;
+		// No value could be assigned.
+		// Mark this variable as TBA and continue.
+
+		v.skipped = true;
+
+		boolean result = solve(s);
+
+		v.skipped = false;
+
+		return result;
 	}
+	
+	
+	private static boolean allDone(CSPState s){
+
+	    for(Variable v : s.variables.values()){
+
+	        if(!v.assigned && !v.skipped)
+	            return false;
+	    }
+
+	    return true;
+	}
+	
 
 	private static boolean consistent(CSPState s, Variable v, Value val) {
 		Course c = v.course;
@@ -344,6 +387,10 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 		Map<String, Boolean> usedLab = new HashMap<>();
 
 		for (Variable v : s.variables.values()) {
+			if(!v.assigned) {
+				continue;
+			}
+			
 			if (v.course.type == CourseType.LAB_ORIENTED_THEORY) {
 				usedLab.putIfAbsent(v.course.id, false);
 				Room r = s.rooms.get(v.assignedValue.roomId);
@@ -358,6 +405,11 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 		Map<String, Boolean> usedLab = new HashMap<>();
 
 		for (Variable v : s.variables.values()) {
+			
+			if(!v.assigned) {
+				continue;
+			}
+			
 			if (v.course.type == CourseType.LAB) {
 				usedLab.putIfAbsent(v.course.id, true);
 				Room r = s.rooms.get(v.assignedValue.roomId);

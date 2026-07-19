@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import entity.Course;
 import entity.CourseType;
@@ -163,7 +164,6 @@ public class Main {
 	}
 
 	public static boolean isComplete = false;
-	public static Map<String, Boolean> inCompleteLabOriented = new HashMap<String, Boolean>();
 	public static boolean isLabOrientedIncomplete = false;
 
 	public static void main(String[] args) {
@@ -195,111 +195,87 @@ public class Main {
 		CSPSolver.reset();
 		boolean solved = CSPSolver.startSolve(state);
 
-		isComplete = false;
-		if (CSPSolver.getBestAssignment().size() == state.variables.size()) {
-			System.out.println("Solution FOUND");
-			isComplete = true;
+		Map<String, Value> bestAssignment = CSPSolver.getBestAssignment();
+		Set<String> bestSkipped = CSPSolver.getBestSkipped();
+
+		isComplete = bestAssignment.size() == state.variables.size();
+
+		if (isComplete) {
+		    System.out.println("Complete solution found.");
 		} else {
-			System.out.println("NO complete solution");
-		}
+		    System.out.println("Partial solution found.");
+		    System.out.println("Assigned : " + bestAssignment.size());
+		    System.out.println("TBA : " + bestSkipped.size());
 
-		int countAssigned = 0;
-		int countUnassigned = 0;
-		int countUnassignedTheory = 0;
-		int countUnassignedLab = 0;
-		int countUnasignedLabOrientedTheory = 0;
-		ArrayList<String> unassigedVarId = new ArrayList<String>();
-		inCompleteLabOriented = new HashMap<>();
-		isLabOrientedIncomplete = false;
-		for (var a : state.variables.values()) {
-			if (a.assigned) {
-				countAssigned++;
-			} else {
-				countUnassigned++;
-				if (a.course.type == CourseType.LAB) {
-					countUnassignedLab++;
-				} else if (a.course.type == CourseType.THEORY) {
-					countUnassignedTheory++;
-				} else {
-					countUnasignedLabOrientedTheory++;
-				}
-				unassigedVarId.add(a.id);
-			}
+		    for (String id : bestSkipped) {
+		        System.out.println(id);
+		    }
+		}
+		
+		
 
-			// check incomplete labOriented
-			try {
-				if (a.course.type == CourseType.LAB_ORIENTED_THEORY) {
-					inCompleteLabOriented.putIfAbsent(a.section.id + "_" + a.course.id, false);
-					Room r = state.rooms.get(a.assignedValue.roomId);
-					if (r.type == RoomType.LAB)
-						inCompleteLabOriented.put(a.section.id + "_" + a.course.id, true);
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-		}
-		isLabOrientedIncomplete = inCompleteLabOriented.containsValue(false);
-		System.out.println(isLabOrientedIncomplete);
-		for (String a : inCompleteLabOriented.keySet()) {
-			if (inCompleteLabOriented.get(a) == false) {
-				System.out.println(a);
-			}
-			;
-		}
 
 //		 restore best found assignment
-		if (CSPSolver.getBestAssignment().size()==state.variables.size()) {
+		if (!bestAssignment.isEmpty()) {
 
-			// clear occupation maps first
 			state.clearOccupations();
+			
+			for (Teacher t : state.teachers.values()) {
+			    state.teacherWeeklyLoad.put(t.id, 0f);
+			}
 
 			for (Variable v : state.variables.values()) {
-				v.assigned = true;
-				v.assignedValue = CSPSolver.getBestAssignment().get(v.id);
 
-				Value val = v.assignedValue;
-if(val==null)continue;
-				state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
-				state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+			    Value val = bestAssignment.get(v.id);
 
-//				if (val.teacherId != PartialRoutineBuilder.TBA_TEACHER) {
-//					state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
-//				}
-//
-//				if (!PartialRoutineBuilder.TBA_ROOM.equals(val.roomId)) {
-//					state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
-//				}
-//
-				state.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
+			    if (val == null) {
+			        v.assigned = false;
+			        v.assignedValue = null;
+			        v.skipped = bestSkipped.contains(v.id);
+			        continue;
+			    }
+
+			    v.assigned = true;
+			    v.skipped = false;
+			    v.assignedValue = val;
+
+			    state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
+			    state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+			    state.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
+			    state.teacherWeeklyLoad.put(
+			    	    val.teacherId,
+			    	    state.teacherWeeklyLoad.get(val.teacherId)
+			    	        + ((float) val.slotCount * 30f / 60f)
+			    	);
 			}
-//
-//			PartialRoutineBuilder.build(state);
-			solved = true;
+
+			solved = isComplete;
 		}
 
+		isLabOrientedIncomplete = !CSPSolver.isAllLabFitted(state);
 		System.out.println("\nSolved: " + solved);
 		System.out.println("Timeout: " + Main.timeout);
 		System.out.println("BestAssignment size: " + CSPSolver.getBestAssignment().size());
 //		CSVRoutineExporter.export(state, "routine.csv");
 //		CSVTeacherScheduleExporter.export(state, "teacher_shedules.csv");
 
-		if (CSPSolver.getBestAssignment().isEmpty()) {
-			CSPSolver.routineGenerationPercentage = 100;
-			System.out.println("Total Variable= " + state.variables.size());
-			System.out.println("Total Assigned Variable= " + countAssigned);
-			System.out.println("Total Unassigned Variable= " + countUnassigned);
-			System.out.println("Total Unassigned Lab Variable= " + countUnassignedLab);
-			System.out.println("Total Unassigned Theory Variable= " + countUnassignedTheory);
-			System.out.println("Total Unassigned Lab_oriented_theory Variable= " + countUnasignedLabOrientedTheory);
-			for (var id : unassigedVarId) {
-				System.out.println(id);
-			}
+		if (bestAssignment.isEmpty()) {
+
+		    System.out.println("No solution found.");
+
+		} else if (Main.timeout) {
+
+		    System.out.println("⚠️ Timeout reached — best found solution used");
+
+		} else if (isComplete) {
+
+		    System.out.println("Complete solution restored.");
 
 		} else {
-			System.out.println("⚠️ Timeout reached — best found solution used");
-//			RoutinePrinter.print(state);
-		}
 
+		    System.out.println("Partial solution restored.");
+
+		}
 	}
 
 }

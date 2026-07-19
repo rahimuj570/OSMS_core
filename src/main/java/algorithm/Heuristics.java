@@ -8,7 +8,7 @@ public class Heuristics {
 		int maxDegree = -1;
 
 		for (Variable v : s.variables.values()) {
-			if (v.assigned)
+			if (v.assigned || v.skipped)
 				continue;
 
 			int d = v.domain.size();
