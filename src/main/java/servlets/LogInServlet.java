@@ -8,6 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import helper.ConnectionProvider;
 
 /**
  * Servlet implementation class LogInServlet
@@ -29,12 +34,26 @@ public class LogInServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession sc = request.getSession();
-		if(request.getParameter("username").equals("admin") && request.getParameter("password").equals("123456")) {
-			response.sendRedirect(request.getContextPath()+"/dashboard/courses.jsp");
-		}else {
-			sc.setAttribute("invalid_credential", "Invalid Credential");
-			response.sendRedirect(request.getHeader("referer"));
+		try {
+			PreparedStatement pst = ConnectionProvider.getCon().prepareStatement("select * from admins where admin_username=? and admin_password=?");
+			pst.setString(1, request.getParameter("username"));
+			pst.setString(2, request.getParameter("password"));
+			ResultSet res = pst.executeQuery();
+			
+			if(res.next()) {
+				sc.setAttribute("dept_type", res.getString(3));
+				response.sendRedirect(request.getContextPath()+"/dashboard/courses.jsp");
+			}else {
+				sc.setAttribute("invalid_credential", "Invalid Credential");
+				response.sendRedirect(request.getHeader("referer"));
+			}
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 	}
 
 	/**

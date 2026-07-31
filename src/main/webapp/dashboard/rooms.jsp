@@ -216,7 +216,7 @@ h1 {
 			<tbody>
 				<!-- Example Room -->
 				<%
-				for (Room r : RoomData.getRooms().values()) {
+				for (Room r : RoomData.getRooms(session).values()) {
 				%>
 				<tr>
 					<td><%=r.id%></td>

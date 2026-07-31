@@ -15,6 +15,7 @@ import entity.LabType;
 import entity.Room;
 import entity.RoomType;
 import helper.ConnectionProvider;
+import jakarta.servlet.http.HttpSession;
 
 public class RoomData {
 //	static long FULL_DAY = (1L << Main.SLOTS_PER_DAY) - 1;
@@ -67,12 +68,13 @@ public class RoomData {
 
 	public static Map<String, Room> rooms = new HashMap<String, Room>();
 
-	public static Map<String, Room> getRooms() {
+	public static Map<String, Room> getRooms(HttpSession sc) {
 		rooms.clear();
 
 		Connection con = ConnectionProvider.getCon();
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from rooms");
+			PreparedStatement pst = con
+					.prepareStatement("select * from rooms where dept_type='" + sc.getAttribute("dept_type")+"'");
 			ResultSet res = pst.executeQuery();
 
 			while (res.next()) {
@@ -92,7 +94,8 @@ public class RoomData {
 					sv[day] = slotValue;
 				}
 
-				Room r = new Room(roomId, RoomType.valueOf(roomType), capacity, sv, labType==null?null: LabType.valueOf(labType));
+				Room r = new Room(roomId, RoomType.valueOf(roomType), capacity, sv,
+						labType == null ? null : LabType.valueOf(labType));
 				rooms.put(roomId, r);
 			}
 			pst.close();

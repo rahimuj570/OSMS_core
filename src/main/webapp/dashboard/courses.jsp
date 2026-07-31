@@ -61,8 +61,8 @@
 			<tbody>
 
 				<%
-				TeacherData.getTeachers();
-				for (Course c : CourseData.getCourses()) {
+				TeacherData.getTeachers(session);
+				for (Course c : CourseData.getCourses(session)) {
 				%>
 				<tr>
 					<td><%=c.id%></td>
@@ -178,7 +178,7 @@
 								class="form-select" name="preferredTeachers"
 								id="preferredTeachers" multiple>
 								<%
-								for (Teacher t : TeacherData.getTeachers().values()) {
+								for (Teacher t : TeacherData.getTeachers(session).values()) {
 								%>
 								<option value="<%=t.id%>"><%=t.name%></option>
 								<%
@@ -194,7 +194,7 @@
 								class="form-select" name="forbiddenTeachers"
 								id="forbiddenTeachers" multiple>
 								<%
-								for (Teacher t : TeacherData.getTeachers().values()) {
+								for (Teacher t : TeacherData.getTeachers(session).values()) {
 								%>
 								<option value="<%=t.id%>"><%=t.name%></option>
 								<%
@@ -263,7 +263,7 @@
 								<select class="form-select me-2" name="sections"
 									id="editSections" multiple>
 									<%
-									for (entity.Section s : SectionData.getSections().values()) {
+									for (entity.Section s : SectionData.getSections(session).values()) {
 									%>
 									<option value="<%=s.id%>"><%=s.id%> (Students:
 										<%=s.students%>)
@@ -285,7 +285,7 @@
 								class="form-select" name="preferredTeachers"
 								id="editPreferredTeachers" multiple>
 								<%
-								for (entity.Teacher t : TeacherData.getTeachers().values()) {
+								for (entity.Teacher t : TeacherData.getTeachers(session).values()) {
 								%>
 								<option value="<%=t.id%>"><%=t.name%></option>
 								<%
@@ -301,7 +301,7 @@
 								class="form-select" name="forbiddenTeachers"
 								id="editForbiddenTeachers" multiple>
 								<%
-								for (entity.Teacher t : TeacherData.getTeachers().values()) {
+								for (entity.Teacher t : TeacherData.getTeachers(session).values()) {
 								%>
 								<option value="<%=t.id%>"><%=t.name%></option>
 								<%

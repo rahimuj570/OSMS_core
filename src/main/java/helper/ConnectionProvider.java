@@ -13,6 +13,8 @@ public class ConnectionProvider {
 				try {
 					Class.forName("oracle.jdbc.OracleDriver");
 					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/xe","c##osms","oracle123");
+//					con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/xe","c##osms_test","oracle123");
+
 					System.out.println("DB Connected!");
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block

@@ -11,6 +11,7 @@ import java.util.Map;
 
 import entity.Teacher;
 import helper.ConnectionProvider;
+import jakarta.servlet.http.HttpSession;
 
 public class TeacherData {
 
@@ -139,13 +140,14 @@ public class TeacherData {
 
 	public static Map<Integer, Teacher> teachers = new LinkedHashMap<>();
 
-	public static Map<Integer, Teacher> getTeachers() {
+	public static Map<Integer, Teacher> getTeachers(HttpSession sc) {
 		teachers.clear();
 
 		Connection con = ConnectionProvider.getCon();
 
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from teachers order by teacher_name");
+			PreparedStatement pst = con.prepareStatement("select * from teachers " + "where dept_type='"
+					+ sc.getAttribute("dept_type") +"' order by teacher_name");
 			ResultSet res = pst.executeQuery();
 
 			while (res.next()) {

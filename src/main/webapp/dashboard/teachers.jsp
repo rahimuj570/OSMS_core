@@ -66,7 +66,7 @@
 			<tbody>
 <%
     String[] days = {"Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"};
-    for (Teacher t : TeacherData.getTeachers().values()) {
+    for (Teacher t : TeacherData.getTeachers(session).values()) {
 %>
     <tr>
         <td><%=t.id%></td>

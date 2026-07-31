@@ -55,7 +55,7 @@
 			</thead>
 			<tbody>
 				<%
-				for (Section t : SectionData.getSections().values()) {
+				for (Section t : SectionData.getSections(session).values()) {
 				%>
 				<tr>
 					<td><%=t.id%></td>

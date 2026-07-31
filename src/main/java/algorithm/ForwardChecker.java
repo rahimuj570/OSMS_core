@@ -26,7 +26,7 @@ public class ForwardChecker {
 					    "Domain wiped out: " +
 					    n.id
 					);				
-				return null;
+//				return null;
 			}
 		}
 		return removed;
@@ -40,13 +40,39 @@ public class ForwardChecker {
 		}
 	}
 
+//	private static boolean conflict(Value a, Value b, Variable aVar, Variable bVar) {
+////		if (a.day == b.day && (a.slotMask & b.slotMask) != 0) {
+////			return true;
+////		}
+////		if (aVar.course.id.equals(bVar.course.id) && aVar.section.id.equals(bVar.section.id) && a.day == b.day) {
+////			return true;
+////		}
+//		
+//		if (aVar.course.id.equals(bVar.course.id)
+//		        && aVar.section.id.equals(bVar.section.id)
+//		        && a.day == b.day
+//		        && (a.slotMask & b.slotMask) != 0) {
+//
+//		    return true;
+//		}
+//		return false;
+//	}
+	
 	private static boolean conflict(Value a, Value b, Variable aVar, Variable bVar) {
-		if (a.day == b.day && (a.slotMask & b.slotMask) != 0) {
-			return true;
-		}
-		if (aVar.course.id.equals(bVar.course.id) && aVar.section.id.equals(bVar.section.id) && a.day == b.day) {
-			return true;
-		}
-		return false;
+
+	    // Teacher / Room / Section overlap
+//	    if (a.day == b.day && (a.slotMask & b.slotMask) != 0) {
+//	        return true;
+//	    }
+
+	    // Same course & section cannot overlap
+	    if (aVar.course.id.equals(bVar.course.id)
+	            && aVar.section.id.equals(bVar.section.id)
+	            && a.day == b.day
+	            && (a.slotMask & b.slotMask) != 0 && (a.roomId.equalsIgnoreCase(b.roomId))) {
+	        return true;
+	    }
+
+	    return false;
 	}
 }

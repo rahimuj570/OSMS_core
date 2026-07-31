@@ -38,10 +38,10 @@ public class GenerateRoutineServlet extends HttpServlet {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
-		SectionData.getSections();
-		RoomData.getRooms();
-		CourseData.getCourses();
-		TeacherData.getTeachers();
+		SectionData.getSections(request.getSession());
+		RoomData.getRooms(request.getSession());
+		CourseData.getCourses(request.getSession());
+		TeacherData.getTeachers(request.getSession());
 		
 		String efficiency = request.getParameter("efficiency");
 		String outsidePreferred = request.getParameter("outsidePreferred");

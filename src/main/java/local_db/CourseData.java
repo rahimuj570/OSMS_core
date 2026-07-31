@@ -13,6 +13,7 @@ import entity.Course;
 import entity.CourseType;
 import entity.LabType;
 import helper.ConnectionProvider;
+import jakarta.servlet.http.HttpSession;
 import local_db.TeacherData.TN;
 
 public class CourseData {
@@ -230,11 +231,12 @@ public class CourseData {
 
 	public static List<Course> courses = new ArrayList<Course>();
 
-	public static List<Course> getCourses() {
+	public static List<Course> getCourses(HttpSession sc) {
 		courses.clear();
 		try {
 			Connection con = ConnectionProvider.getCon();
-			PreparedStatement courseStmt = con.prepareStatement("select * from courses order by course_id");
+			PreparedStatement courseStmt = con.prepareStatement("select * from courses " + "where dept_type='"
+					+ sc.getAttribute("dept_type") + "' order by course_id");
 			ResultSet courseRes = courseStmt.executeQuery();
 
 			while (courseRes.next()) {

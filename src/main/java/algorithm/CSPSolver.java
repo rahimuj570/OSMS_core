@@ -22,6 +22,7 @@ public class CSPSolver {
 	private static Map<String, Value> bestAssignment = new HashMap<>();
 
 	private static int nodes = 0;
+	private static long solveTime = 0;
 	private static int MAX_NODES = 1_000_000;
 
 	public static Map<String, Value> getBestAssignment() {
@@ -31,44 +32,55 @@ public class CSPSolver {
 	private static Set<String> bestSkipped = new HashSet<>();
 
 	public static Set<String> getBestSkipped() {
-	    return bestSkipped;
+		return bestSkipped;
 	}
-	
-	
-	
-	
-	///////////////FOR PARTIAL TBA RESULT
+
+	public static int getVisitedNodes() {
+		return nodes;
+	}
+
+	public static long getSolveTime() {
+		return solveTime;
+	}
+	public static double getStatesPerSecond() {
+
+	    if (solveTime == 0)
+	        return 0;
+
+	    return nodes / (solveTime / 1000.0);
+	}
+
+	/////////////// FOR PARTIAL TBA RESULT
 	///
 	///
 	///
-	
+
 	private static int bestPartialAssignedCount = 0;
 
 	private static int currentAssignedCount(CSPState s) {
 
-	    int count = 0;
+		int count = 0;
 
-	    for (Variable v : s.variables.values()) {
-	        if (v.assigned)
-	            count++;
-	    }
+		for (Variable v : s.variables.values()) {
+			if (v.assigned)
+				count++;
+		}
 
-	    return count;
+		return count;
 	}
 	//////////////////////////
-	
-	
-	
+
 	public static void reset() {
 		bestAssignment.clear();
 		bestSkipped.clear();
-		
+
 		bestPartialAssignedCount = -1;
 		shouldTakeFirstSolution = false;
 		isSolverRunning = false;
 		routineGenerationPercentage = 0;
 		Main.timeout = false;
 		nodes = 0;
+		solveTime = 0;
 		bestScore = Integer.MAX_VALUE;
 		bestAssignment.clear();
 
@@ -87,31 +99,27 @@ public class CSPSolver {
 			divisor = 500_000;
 		}
 	}
-	
-	
-	
-	
+
 	public static boolean startSolve(CSPState s) {
-System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution);
-	    isSolverRunning = true;
-	    routineGenerationPercentage = 0;
+		System.out.println("ssssssssssssssssssssssssshoilf 1st" + shouldTakeFirstSolution);
+		long start = System.currentTimeMillis();
+		isSolverRunning = true;
+		routineGenerationPercentage = 0;
 
-	    boolean result = solve(s);
+		boolean result = solve(s);
 
-	    System.out.println("Best Assignment = " + bestAssignment.size());
-	    System.out.println("Best Skipped = " + bestSkipped.size());
-	    
-	    isSolverRunning = false;
-	    routineGenerationPercentage = 100;
+		solveTime = System.currentTimeMillis() - start;
+		System.out.println("Best Assignment = " + bestAssignment.size());
+		System.out.println("Best Skipped = " + bestSkipped.size());
 
-	    return result;
+		isSolverRunning = false;
+		routineGenerationPercentage = 100;
+
+		return result;
 	}
-	
-	
 
 	public static boolean solve(CSPState s) {
-		
-		
+
 		if (++nodes > MAX_NODES) {
 			Main.timeout = true;
 			return true;
@@ -123,62 +131,58 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 		}
 
 		if (allDone(s)) {
-			//			System.out.println("passssssssssssssssssspasssssss");
-			  if (currentAssignedCount(s) == s.variables.size()) {
+			// System.out.println("passssssssssssssssssspasssssss");
+			if (currentAssignedCount(s) == s.variables.size()) {
 
-			        if (!validateLabOriented(s) || !validateLab(s))
-			            return false;
-			    }
+				if (!validateLabOriented(s) || !validateLab(s))
+					return false;
+			}
 
 			int assignedCount = currentAssignedCount(s);
 
 			if (assignedCount > bestPartialAssignedCount) {
 
-			    bestPartialAssignedCount = assignedCount;
+				bestPartialAssignedCount = assignedCount;
 
-			    bestScore = SoftConstraints.score(s);
+				bestScore = SoftConstraints.score(s);
 
-			    bestAssignment.clear();
-			    bestSkipped.clear();
+				bestAssignment.clear();
+				bestSkipped.clear();
 
-			    for (Variable var : s.variables.values()) {
+				for (Variable var : s.variables.values()) {
 
-			        if (var.assigned) {
-			            bestAssignment.put(var.id, var.assignedValue);
-			        }
+					if (var.assigned) {
+						bestAssignment.put(var.id, var.assignedValue);
+					}
 
-			        if (var.skipped) {
-			            bestSkipped.add(var.id);
-			        }
-			    }
+					if (var.skipped) {
+						bestSkipped.add(var.id);
+					}
+				}
+
+			} else if (assignedCount == bestPartialAssignedCount) {
+
+				int score = SoftConstraints.score(s);
+
+				if (score < bestScore) {
+
+					bestScore = score;
+
+					bestAssignment.clear();
+					bestSkipped.clear();
+
+					for (Variable v : s.variables.values()) {
+
+						if (v.assigned)
+							bestAssignment.put(v.id, v.assignedValue);
+
+						if (v.skipped)
+							bestSkipped.add(v.id);
+					}
+				}
 
 			}
-			else if (assignedCount == bestPartialAssignedCount) {
 
-			    int score = SoftConstraints.score(s);
-
-			    if(score < bestScore){
-
-			        bestScore = score;
-
-			        bestAssignment.clear();
-			        bestSkipped.clear();
-
-			        for(Variable v : s.variables.values()){
-
-			            if(v.assigned)
-			                bestAssignment.put(v.id,v.assignedValue);
-
-			            if(v.skipped)
-			                bestSkipped.add(v.id);
-			        }
-			    }
-			    
-			}
-
-			
-			
-			
 			if (shouldTakeFirstSolution) {
 				routineGenerationPercentage = 100;
 				return true;
@@ -190,9 +194,9 @@ System.out.println("ssssssssssssssssssssssssshoilf 1st"+shouldTakeFirstSolution)
 
 //		if (v == null || v.domain.isEmpty())
 //			return false;
-if(v==null) {
-	return false;
-}
+		if (v == null) {
+			return false;
+		}
 		List<Value> values = new ArrayList<>(v.domain);
 
 		for (Value val : values) {
@@ -204,19 +208,18 @@ if(v==null) {
 
 			Map<String, List<Value>> removed = ForwardChecker.prune(s, v, val);
 
-			if (removed != null) {
+//			if (removed != null) {
 
-				boolean result = solve(s);
+			boolean result = solve(s);
 
-				ForwardChecker.restore(s, removed);
+			ForwardChecker.restore(s, removed);
 
-				if (result)
-					return true;
-			}
+			if (result)
+				return true;
+//			}
 
 			unassign(s, v, val);
 		}
-	
 
 		// No value could be assigned.
 		// Mark this variable as TBA and continue.
@@ -229,19 +232,17 @@ if(v==null) {
 
 		return result;
 	}
-	
-	
-	private static boolean allDone(CSPState s){
 
-	    for(Variable v : s.variables.values()){
+	private static boolean allDone(CSPState s) {
 
-	        if(!v.assigned && !v.skipped)
-	            return false;
-	    }
+		for (Variable v : s.variables.values()) {
 
-	    return true;
+			if (!v.assigned && !v.skipped)
+				return false;
+		}
+
+		return true;
 	}
-	
 
 	private static boolean consistent(CSPState s, Variable v, Value val) {
 		Course c = v.course;
@@ -289,20 +290,36 @@ if(v==null) {
 				return false;
 		}
 
+		// Same course for the same section cannot be scheduled twice on the same day.
 		for (Variable other : s.variables.values()) {
+
 			if (!other.assigned)
 				continue;
 
-//			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
-//					&& other.assignedValue.day == val.day) {
-//				return false;
-//			}
-			// allow same day, but not overlapping
+			if (other == v)
+				continue;
+
 			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
-					&& other.assignedValue.day == val.day && (other.assignedValue.slotMask & val.slotMask) != 0) {
+					&& other.assignedValue.day == val.day) {
+
 				return false;
 			}
 		}
+
+//		for (Variable other : s.variables.values()) {
+//			if (!other.assigned)
+//				continue;
+//
+////			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
+////					&& other.assignedValue.day == val.day) {
+////				return false;
+////			}
+//			// allow same day, but not overlapping
+//			if (other.course.id.equals(v.course.id) && other.section.id.equals(v.section.id)
+//					&& other.assignedValue.day == val.day && (other.assignedValue.slotMask & val.slotMask) != 0) {
+//				return false;
+//			}
+//		}
 
 		// Must be same teacher forr a specific section fpr same course
 //		String k = key(v);
@@ -311,11 +328,11 @@ if(v==null) {
 //		if (assignedTeacher != 0 && assignedTeacher != val.teacherId) {
 //			return false;
 //		}
-		
+
 		// Teacher weekly limit
 		float currentLoad = s.teacherWeeklyLoad.get(val.teacherId);
 
-		if (currentLoad + (float)(val.slotCount*30.0)/(float)60.0 > t.maxSlotHours) {
+		if (currentLoad + (float) (val.slotCount * 30.0) / (float) 60.0 > t.maxSlotHours) {
 //		    return false;
 		}
 
@@ -342,12 +359,10 @@ if(v==null) {
 //		if (!s.courseSectionTeacher.containsKey(k)) {
 //			s.courseSectionTeacher.put(k, val.teacherId);
 //		}
-		
+
 		// NEW
-	    s.teacherWeeklyLoad.put(
-	        val.teacherId,
-	        s.teacherWeeklyLoad.get(val.teacherId) + (float)((val.slotCount*30.0)/60.0)
-	    );
+		s.teacherWeeklyLoad.put(val.teacherId,
+				s.teacherWeeklyLoad.get(val.teacherId) + (float) ((val.slotCount * 30.0) / 60.0));
 	}
 
 	private static void unassign(CSPState s, Variable v, Value val) {
@@ -376,21 +391,19 @@ if(v==null) {
 //		if (!stillUsed) {
 //			s.courseSectionTeacher.remove(k);
 //		}
-		
-		 s.teacherWeeklyLoad.put(
-			        val.teacherId,
-			        s.teacherWeeklyLoad.get(val.teacherId) - (float)((val.slotCount*30.0)/60.0)
-			    );
+
+		s.teacherWeeklyLoad.put(val.teacherId,
+				s.teacherWeeklyLoad.get(val.teacherId) - (float) ((val.slotCount * 30.0) / 60.0));
 	}
 
 	private static boolean validateLabOriented(CSPState s) {
 		Map<String, Boolean> usedLab = new HashMap<>();
 
 		for (Variable v : s.variables.values()) {
-			if(!v.assigned) {
+			if (!v.assigned) {
 				continue;
 			}
-			
+
 			if (v.course.type == CourseType.LAB_ORIENTED_THEORY) {
 				usedLab.putIfAbsent(v.course.id, false);
 				Room r = s.rooms.get(v.assignedValue.roomId);
@@ -405,11 +418,11 @@ if(v==null) {
 		Map<String, Boolean> usedLab = new HashMap<>();
 
 		for (Variable v : s.variables.values()) {
-			
-			if(!v.assigned) {
+
+			if (!v.assigned) {
 				continue;
 			}
-			
+
 			if (v.course.type == CourseType.LAB) {
 				usedLab.putIfAbsent(v.course.id, true);
 				Room r = s.rooms.get(v.assignedValue.roomId);
@@ -419,7 +432,7 @@ if(v==null) {
 		}
 		return !usedLab.containsValue(false);
 	}
-	
+
 	public static boolean isAllLabFitted(CSPState s) {
 		return validateLab(s) && validateLabOriented(s);
 	}

@@ -17,6 +17,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="description"
+      content="Automated University Routine Generator (AURG), an Integrated Design Project-II developed for the University of Scholars to automate university timetable generation using Constraint Satisfaction Problem (CSP).">
+
+<meta name="author"
+      content="Md. Rahimujjaman Rahim">
+
+<meta name="keywords"
+      content="Automated University Routine Generator,AURG,University of Scholars,Routine Generator,Timetable Generator,CSP,Constraint Satisfaction Problem,Java,JSP,IDP-II">
+
 <title>Generated Routine</title>
 
 <style type="text/css">
@@ -168,11 +177,29 @@ body {
         <h2><%=Main.state.variables.size()%></h2>
         <p>Total Classes</p>
     </div>
+    
+   
 
 </div>
 
+<div class="summary-box">
 
+    <div class="summary-item success">
+        <h2><%= CSPSolver.getVisitedNodes()%></h2>
+        <p>Search States Explored</p>
+    </div>
 
+    <div class="summary-item warning">
+        <h2><%= String.format("%.2f", CSPSolver.getSolveTime()/1000.0) %> s</h2>
+        <p>Execution Time</p>
+    </div>
+
+    <div class="summary-item">
+        <h2><%= String.format("%,.0f", CSPSolver.getStatesPerSecond()) %></h2>
+        <p>Search States/sec</p>
+   
+</div>
+</div>
 
 
 
@@ -316,6 +343,12 @@ for(Variable v : vars){
 	<button class="print-btn">
 		Teacher's Schedule
 	</button>
+</a>
+
+<a href="diagnostic.jsp">
+    <button class="print-btn">
+        🔍 Routine Diagnostics
+    </button>
 </a>
 
 <a href="courses.jsp">

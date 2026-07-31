@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 import entity.Section;
 import helper.ConnectionProvider;
+import jakarta.servlet.http.HttpSession;
 
 public class SectionData {
 
@@ -39,13 +40,14 @@ public class SectionData {
 	
 	public static Map<String, Section> sections = new LinkedHashMap<String, Section>();
 	
-	public static Map<String, Section> getSections(){
+	public static Map<String, Section> getSections(HttpSession sc){
 		sections.clear();
 		
 		Connection con = ConnectionProvider.getCon();
 		
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from sections order by section_id");
+			PreparedStatement pst = con.prepareStatement("select * from sections " + "where dept_type='"
+					+ sc.getAttribute("dept_type") +"' order by section_id");
 			ResultSet res = pst.executeQuery();
 			
 			while(res.next()) {
