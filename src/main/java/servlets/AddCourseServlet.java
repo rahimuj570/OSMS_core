@@ -48,7 +48,7 @@ public class AddCourseServlet extends HttpServlet {
 		try {
 			// Insert into courses
 			con.setAutoCommit(false);
-			String sqlCourse = "INSERT INTO courses (course_id, course_type, required_lab) VALUES (?,?,?)";
+			String sqlCourse = "INSERT INTO courses (course_id, course_type, required_lab, dept_type) VALUES (?,?,?,?)";
 			PreparedStatement psCourse = con.prepareStatement(sqlCourse);
 			psCourse.setString(1, courseId);
 			psCourse.setString(2, courseType);
@@ -57,6 +57,8 @@ public class AddCourseServlet extends HttpServlet {
 			} else {
 				psCourse.setString(3, requiredLab);
 			}
+			String deptType = (String) sc.getAttribute("dept_type");
+			psCourse.setString(4, deptType);
 			psCourse.executeUpdate();
 
 			// Insert preferred teachers

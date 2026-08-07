@@ -80,7 +80,7 @@ public class AddRoomServlet extends HttpServlet {
 			Connection con = ConnectionProvider.getCon();
 			try {
 				// Insert into rooms
-				String sqlRoom = "INSERT INTO rooms (room_id, room_type, room_capacity, lab_type) VALUES (?,?,?,?)";
+				String sqlRoom = "INSERT INTO rooms (room_id, room_type, room_capacity, lab_type, dept_type) VALUES (?,?,?,?,?)";
 				PreparedStatement psRoom = con.prepareStatement(sqlRoom);
 				psRoom.setString(1, roomId);
 				psRoom.setString(2, roomType);
@@ -90,6 +90,7 @@ public class AddRoomServlet extends HttpServlet {
 				} else {
 					psRoom.setString(4, labType);
 				}
+				psRoom.setString(5, (String)sc.getAttribute("dept_type"));
 				psRoom.executeUpdate();
 
 				for (int day = 0; day <= 6; day++) {

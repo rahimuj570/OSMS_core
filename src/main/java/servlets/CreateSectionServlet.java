@@ -40,11 +40,11 @@ public class CreateSectionServlet extends HttpServlet {
 		int students = Integer.parseInt(request.getParameter("sectionStudents"));
 		Connection con = ConnectionProvider.getCon();
 		try {
-			String sql = "INSERT INTO sections (section_id, students) VALUES (?, ?)";
+			String sql = "INSERT INTO sections (section_id, students, dept_type) VALUES (?, ?, ?)";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setString(1, sectionId);
 			ps.setInt(2, students);
-
+			ps.setString(3, (String) sc.getAttribute("dept_type"));
 			int rows = ps.executeUpdate();
 
 			if (rows > 0) {

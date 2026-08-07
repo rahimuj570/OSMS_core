@@ -61,13 +61,14 @@ public class CreateTeacher extends HttpServlet {
 		Connection con = ConnectionProvider.getCon();
 		try {
 			PreparedStatement pst = con.prepareStatement(
-					"INSERT INTO teachers (teacher_name,max_slot_hours, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?,?)");
+					"INSERT INTO teachers (teacher_name,max_slot_hours,dept_type, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?,?,?)");
 
 			pst.setString(1, teacherName);
 			pst.setInt(2, teacherMaxSlotHours);
+			pst.setString(3, (String)sc.getAttribute("dept_type"));
 
 			for (int i = 0; i < 7; i++) {
-				pst.setInt(i + 3, days[i] ? 1 : 0);
+				pst.setInt(i + 4, days[i] ? 1 : 0);
 			}
 
 			pst.executeUpdate();
