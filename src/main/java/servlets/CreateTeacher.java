@@ -59,9 +59,8 @@ public class CreateTeacher extends HttpServlet {
 
 		// Now you can insert into DB
 		Connection con = ConnectionProvider.getCon();
-		try {
-			PreparedStatement pst = con.prepareStatement(
-					"INSERT INTO teachers (teacher_name,max_slot_hours,dept_type, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?,?,?)");
+		try (PreparedStatement pst = con.prepareStatement(
+				"INSERT INTO teachers (teacher_name,max_slot_hours,dept_type, saturday, sunday, monday, tuesday, wednesday, thursday, friday) VALUES (?,?,?,?,?,?,?,?,?,?)")) {
 
 			pst.setString(1, teacherName);
 			pst.setInt(2, teacherMaxSlotHours);
@@ -78,12 +77,6 @@ public class CreateTeacher extends HttpServlet {
 			sc.setAttribute("teacher_false", "Could not create new teacher. Try Again!");
 			e.printStackTrace();
 		} finally {
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 			response.sendRedirect(request.getContextPath() + "/dashboard/teachers.jsp");
 		}
 

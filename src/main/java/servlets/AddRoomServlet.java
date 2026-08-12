@@ -81,48 +81,44 @@ public class AddRoomServlet extends HttpServlet {
 			try {
 				// Insert into rooms
 				String sqlRoom = "INSERT INTO rooms (room_id, room_type, room_capacity, lab_type, dept_type) VALUES (?,?,?,?,?)";
-				PreparedStatement psRoom = con.prepareStatement(sqlRoom);
-				psRoom.setString(1, roomId);
-				psRoom.setString(2, roomType);
-				psRoom.setInt(3, capacity);
-				if (labType == null || labType.isEmpty()) {
-					psRoom.setNull(4, java.sql.Types.VARCHAR);
-				} else {
-					psRoom.setString(4, labType);
-				}
-				psRoom.setString(5, (String)sc.getAttribute("dept_type"));
-				psRoom.executeUpdate();
+				try (PreparedStatement psRoom = con.prepareStatement(sqlRoom)) {
+					psRoom.setString(1, roomId);
+					psRoom.setString(2, roomType);
+					psRoom.setInt(3, capacity);
+					if (labType == null || labType.isEmpty()) {
+						psRoom.setNull(4, java.sql.Types.VARCHAR);
+					} else {
+						psRoom.setString(4, labType);
+					}
+					psRoom.setString(5, (String)sc.getAttribute("dept_type"));
+					psRoom.executeUpdate();
 
-				for (int day = 0; day <= 6; day++) {
-					String[] slots = req.getParameterValues("slots_" + day);
-					int slotValue = 0;
-					if (slots != null) {
-						for (String s : slots) {
-							Integer bit = SLOT_MAP.get(s);
-							if (bit != null) {
-								slotValue |= (1 << bit);
+					for (int day = 0; day <= 6; day++) {
+						String[] slots = req.getParameterValues("slots_" + day);
+						int slotValue = 0;
+						if (slots != null) {
+							for (String s : slots) {
+								Integer bit = SLOT_MAP.get(s);
+								if (bit != null) {
+									slotValue |= (1 << bit);
+								}
 							}
 						}
+						// Insert availability row
+						String sqlAvail = "INSERT INTO room_availability (room_id, slot_day, slot_value) VALUES (?,?,?)";
+						try (PreparedStatement psAvail = con.prepareStatement(sqlAvail)) {
+							psAvail.setString(1, roomId);
+							psAvail.setInt(2, day);
+							psAvail.setInt(3, slotValue);
+							psAvail.executeUpdate();
+						}
 					}
-					// Insert availability row
-					String sqlAvail = "INSERT INTO room_availability (room_id, slot_day, slot_value) VALUES (?,?,?)";
-					PreparedStatement psAvail = con.prepareStatement(sqlAvail);
-					psAvail.setString(1, roomId);
-					psAvail.setInt(2, day);
-					psAvail.setInt(3, slotValue);
-					psAvail.executeUpdate();
+					sc.setAttribute("room_true", "Room added successfully!");
 				}
-				sc.setAttribute("room_true", "Room added successfully!");
 			} catch (Exception e) {
 				e.printStackTrace();
 				sc.setAttribute("room_false", "Error occurred at server-side!");
 			} finally {
-				try {
-					if (con != null)
-						con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 				resp.sendRedirect(req.getContextPath() + "/dashboard/rooms.jsp");
 			}
 		}

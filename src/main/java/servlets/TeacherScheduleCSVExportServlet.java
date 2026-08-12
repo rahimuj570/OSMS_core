@@ -13,6 +13,7 @@ import java.util.List;
 
 import algorithm.CSPState;
 import algorithm.Main;
+import algorithm.RoutinePrinter;
 import algorithm.Value;
 import algorithm.Variable;
 import entity.Course;
@@ -126,7 +127,7 @@ public class TeacherScheduleCSVExportServlet extends HttpServlet {
 
                 writer.append(DAYS[val.day]).append(",")
                         .append("\"")
-                        .append(timeRange(val.startSlot, val.slotCount))
+                        .append(RoutinePrinter.timeRange(val.startSlot, val.slotCount))
                         .append("\"")
                         .append(",")
                         .append(c.id)

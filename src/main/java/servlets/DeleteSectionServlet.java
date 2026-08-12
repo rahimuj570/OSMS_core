@@ -46,16 +46,17 @@ public class DeleteSectionServlet extends HttpServlet {
 			pst2.close();
 
 			String sql = "DELETE FROM sections WHERE section_id = ?";
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setString(1, sectionId);
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
+				ps.setString(1, sectionId);
 
-			int rows = ps.executeUpdate();
+				int rows = ps.executeUpdate();
 
-			if (rows > 0) {
-				sc.setAttribute("section_true", "Section deleted successfully!");
-			} else {
-				// failure: redirect with error
-				sc.setAttribute("section_false", "No section found to delete!");
+				if (rows > 0) {
+					sc.setAttribute("section_true", "Section deleted successfully!");
+				} else {
+					// failure: redirect with error
+					sc.setAttribute("section_false", "No section found to delete!");
+				}
 			}
 			con.commit();
 		} catch (Exception e) {
@@ -73,12 +74,6 @@ public class DeleteSectionServlet extends HttpServlet {
 				con.setAutoCommit(true);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			response.sendRedirect(request.getContextPath() + "/dashboard/sections.jsp");

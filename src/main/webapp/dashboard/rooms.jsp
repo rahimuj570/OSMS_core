@@ -312,6 +312,7 @@ String slotsString = sb.toString();
 
 			</tbody>
 		</table>
+			<%@ include file="footer.jsp" %>
 	</main>
 
 

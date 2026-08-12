@@ -71,6 +71,7 @@
 				<!-- More rows dynamically generated -->
 			</tbody>
 		</table>
+			<%@ include file="footer.jsp" %>
 	</main>
 
 	<!-- Modal -->

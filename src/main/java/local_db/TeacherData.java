@@ -144,11 +144,12 @@ public class TeacherData {
 		teachers.clear();
 
 		Connection con = ConnectionProvider.getCon();
-
+		PreparedStatement pst = null;
+		ResultSet res = null;
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from teachers " + "where dept_type='"
+			pst = con.prepareStatement("select * from teachers " + "where dept_type='"
 					+ sc.getAttribute("dept_type") +"' order by teacher_name");
-			ResultSet res = pst.executeQuery();
+			res = pst.executeQuery();
 
 			while (res.next()) {
 				int teacherId = res.getInt("teacher_id");
@@ -171,6 +172,9 @@ public class TeacherData {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try { if (res != null) res.close(); } catch (SQLException e) { e.printStackTrace(); }
+			try { if (pst != null) pst.close(); } catch (SQLException e) { e.printStackTrace(); }
 		}
 		return teachers;
 

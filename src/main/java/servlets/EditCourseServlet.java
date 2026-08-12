@@ -122,8 +122,6 @@ public class EditCourseServlet extends HttpServlet {
 		} finally {
 			try {
 				con.setAutoCommit(true);
-				if (con != null)
-					con.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

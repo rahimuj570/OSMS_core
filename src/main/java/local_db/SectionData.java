@@ -44,11 +44,12 @@ public class SectionData {
 		sections.clear();
 		
 		Connection con = ConnectionProvider.getCon();
-		
+		PreparedStatement pst = null;
+		ResultSet res = null;
 		try {
-			PreparedStatement pst = con.prepareStatement("select * from sections " + "where dept_type='"
+			pst = con.prepareStatement("select * from sections " + "where dept_type='"
 					+ sc.getAttribute("dept_type") +"' order by section_id");
-			ResultSet res = pst.executeQuery();
+			res = pst.executeQuery();
 			
 			while(res.next()) {
 				Section s =new Section(res.getString("section_id"),res.getInt("students"));
@@ -58,6 +59,9 @@ public class SectionData {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try { if (res != null) res.close(); } catch (SQLException e) { e.printStackTrace(); }
+			try { if (pst != null) pst.close(); } catch (SQLException e) { e.printStackTrace(); }
 		}
 		
 		

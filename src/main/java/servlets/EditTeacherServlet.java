@@ -57,10 +57,8 @@ public class EditTeacherServlet extends HttpServlet {
 			}
 		}
 		Connection con = ConnectionProvider.getCon();
-		try {
-
-			PreparedStatement pst = con.prepareStatement(
-					"UPDATE teachers SET teacher_name=?,max_slot_hours=?, saturday=?, sunday=?, monday=?, tuesday=?, wednesday=?, thursday=?, friday=? WHERE teacher_id=?");
+		try (PreparedStatement pst = con.prepareStatement(
+				"UPDATE teachers SET teacher_name=?,max_slot_hours=?, saturday=?, sunday=?, monday=?, tuesday=?, wednesday=?, thursday=?, friday=? WHERE teacher_id=?")) {
 
 			pst.setString(1, teacherName);
 			pst.setInt(2, teacherSlotMaxHours);
@@ -80,12 +78,6 @@ public class EditTeacherServlet extends HttpServlet {
 			e.printStackTrace();
 			sc.setAttribute("teacher_true", "Error updating teacher: " + e.getMessage());
 		} finally {
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 			response.sendRedirect(request.getContextPath() + "/dashboard/teachers.jsp");
 		}
 	}

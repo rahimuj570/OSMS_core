@@ -40,35 +40,37 @@ public class DeleteCourseServlet extends HttpServlet {
 		String courseId = request.getParameter("course_id");
 
 		Connection con = null;
-		PreparedStatement pst = null;
-
 		try {
 			con = ConnectionProvider.getCon();
 			con.setAutoCommit(false);
 			// Delete from child tables first to avoid FK constraint errors
-			pst = con.prepareStatement("DELETE FROM course_sections WHERE course_id = ?");
-			pst.setString(1, courseId);
-			pst.executeUpdate();
+			try (PreparedStatement pst1 = con.prepareStatement("DELETE FROM course_sections WHERE course_id = ?")) {
+				pst1.setString(1, courseId);
+				pst1.executeUpdate();
+			}
 
-			pst = con.prepareStatement("DELETE FROM course_preferred_teachers WHERE course_id = ?");
-			pst.setString(1, courseId);
-			pst.executeUpdate();
+			try (PreparedStatement pst2 = con.prepareStatement("DELETE FROM course_preferred_teachers WHERE course_id = ?")) {
+				pst2.setString(1, courseId);
+				pst2.executeUpdate();
+			}
 
-			pst = con.prepareStatement("DELETE FROM course_forbidden_teachers WHERE course_id = ?");
-			pst.setString(1, courseId);
-			pst.executeUpdate();
+			try (PreparedStatement pst3 = con.prepareStatement("DELETE FROM course_forbidden_teachers WHERE course_id = ?")) {
+				pst3.setString(1, courseId);
+				pst3.executeUpdate();
+			}
 
 			// Finally delete from courses
-			pst = con.prepareStatement("DELETE FROM courses WHERE course_id = ?");
-			pst.setString(1, courseId);
-			int rows = pst.executeUpdate();
+			try (PreparedStatement pst4 = con.prepareStatement("DELETE FROM courses WHERE course_id = ?")) {
+				pst4.setString(1, courseId);
+				int rows = pst4.executeUpdate();
 
-			if (rows > 0) {
-				sc.setAttribute("course_true", "Course with ID " + courseId + " deleted successfully!");
-				con.commit();
-			} else {
-				sc.setAttribute("course_false", "No course found with ID " + courseId);
-				con.rollback();
+				if (rows > 0) {
+					sc.setAttribute("course_true", "Course with ID " + courseId + " deleted successfully!");
+					con.commit();
+				} else {
+					sc.setAttribute("course_false", "No course found with ID " + courseId);
+					con.rollback();
+				}
 			}
 
 		} catch (SQLException e) {
@@ -82,14 +84,9 @@ public class DeleteCourseServlet extends HttpServlet {
 			sc.setAttribute("course_false", "Error deleting course: " + e.getMessage());
 		} finally {
 			try {
-				if (pst != null)
-					pst.close();
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}finally {
 				response.sendRedirect(request.getContextPath()+"/dashboard/courses.jsp");
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}

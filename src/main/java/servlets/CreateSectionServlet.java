@@ -41,27 +41,22 @@ public class CreateSectionServlet extends HttpServlet {
 		Connection con = ConnectionProvider.getCon();
 		try {
 			String sql = "INSERT INTO sections (section_id, students, dept_type) VALUES (?, ?, ?)";
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setString(1, sectionId);
-			ps.setInt(2, students);
-			ps.setString(3, (String) sc.getAttribute("dept_type"));
-			int rows = ps.executeUpdate();
+			try (PreparedStatement ps = con.prepareStatement(sql)) {
+				ps.setString(1, sectionId);
+				ps.setInt(2, students);
+				ps.setString(3, (String) sc.getAttribute("dept_type"));
+				int rows = ps.executeUpdate();
 
-			if (rows > 0) {
-				sc.setAttribute("section_true", "New Section Created!");
-			} else {
-				sc.setAttribute("section_false", "Failed to Create New Section!");
+				if (rows > 0) {
+					sc.setAttribute("section_true", "New Section Created!");
+				} else {
+					sc.setAttribute("section_false", "Failed to Create New Section!");
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			sc.setAttribute("section_false", "Something went wrong at server-side.");
 		} finally {
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 			response.sendRedirect(request.getContextPath() + "/dashboard/sections.jsp");
 		}
 

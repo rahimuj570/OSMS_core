@@ -107,6 +107,7 @@
 </tbody>
 			
 		</table>
+			<%@ include file="footer.jsp" %>
 	</main>
 	<!-- Modal -->
 	<div class="modal fade" id="addTeacherModal" tabindex="-1"

@@ -14,6 +14,7 @@ import java.util.List;
 
 import algorithm.CSPState;
 import algorithm.Main;
+import algorithm.RoutinePrinter;
 import algorithm.Value;
 import algorithm.Variable;
 import entity.Course;
@@ -120,7 +121,7 @@ public class ClassCSVExportServlet extends HttpServlet {
                 Course c = v.course;
 
                 String day = DAYS[val.day];
-                String time = timeRange(
+                String time = RoutinePrinter.timeRange(
                         val.startSlot,
                         val.slotCount);
 

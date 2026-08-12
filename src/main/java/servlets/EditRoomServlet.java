@@ -126,13 +126,6 @@ public class EditRoomServlet extends HttpServlet {
 				e.printStackTrace();
 			}
 
-			// Important: Close connection if not handled by ConnectionProvider
-			try {
-				if (conn != null)
-					conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 
 		response.sendRedirect(request.getContextPath() + "/dashboard/rooms.jsp");

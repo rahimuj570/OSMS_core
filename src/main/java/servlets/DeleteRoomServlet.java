@@ -41,20 +41,22 @@ public class DeleteRoomServlet extends HttpServlet {
 			con.setAutoCommit(false);
 			// First delete availability rows
 			String sqlAvail = "DELETE FROM room_availability WHERE room_id=?";
-			PreparedStatement psAvail = con.prepareStatement(sqlAvail);
-			psAvail.setString(1, roomId);
-			psAvail.executeUpdate();
+			try (PreparedStatement psAvail = con.prepareStatement(sqlAvail)) {
+				psAvail.setString(1, roomId);
+				psAvail.executeUpdate();
+			}
 
 			// Then delete the room itself
 			String sqlRoom = "DELETE FROM rooms WHERE room_id=?";
-			PreparedStatement psRoom = con.prepareStatement(sqlRoom);
-			psRoom.setString(1, roomId);
-			int rows = psRoom.executeUpdate();
+			try (PreparedStatement psRoom = con.prepareStatement(sqlRoom)) {
+				psRoom.setString(1, roomId);
+				int rows = psRoom.executeUpdate();
 
-			if (rows > 0) {
-				sc.setAttribute("room_true", "Room deleted successfully!");
-			} else {
-				sc.setAttribute("room_false", "Room not found!");
+				if (rows > 0) {
+					sc.setAttribute("room_true", "Room deleted successfully!");
+				} else {
+					sc.setAttribute("room_false", "Room not found!");
+				}
 			}
 			con.commit();
 		} catch (Exception e) {
@@ -71,13 +73,6 @@ public class DeleteRoomServlet extends HttpServlet {
 				con.setAutoCommit(true);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 

@@ -38,17 +38,16 @@ public class LogInServlet extends HttpServlet {
 			PreparedStatement pst = ConnectionProvider.getCon().prepareStatement("select * from admins where admin_username=? and admin_password=?");
 			pst.setString(1, request.getParameter("username"));
 			pst.setString(2, request.getParameter("password"));
-			ResultSet res = pst.executeQuery();
+			try (ResultSet res = pst.executeQuery()) {
 			
-			if(res.next()) {
-				sc.setAttribute("dept_type", res.getString(3));
-				response.sendRedirect(request.getContextPath()+"/dashboard/courses.jsp");
-			}else {
-				sc.setAttribute("invalid_credential", "Invalid Credential");
-				response.sendRedirect(request.getHeader("referer"));
+				if(res.next()) {
+					sc.setAttribute("dept_type", res.getString(3));
+					response.sendRedirect(request.getContextPath()+"/dashboard/courses.jsp");
+				}else {
+					sc.setAttribute("invalid_credential", "Invalid Credential");
+					response.sendRedirect(request.getHeader("referer"));
+				}
 			}
-			
-			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

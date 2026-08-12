@@ -46,8 +46,17 @@ public class RoutinePrinter {
 	}
 
 	public static String timeRange(int startSlot, int slotCount) {
-		int startHour = 9 + (startSlot*30)/60;
-		int endHour = startHour + (slotCount * 30) / 60;
-		return startHour + ":"+(startSlot*30)%60+" - " + (endHour+":"+((startSlot*30)%60+ (slotCount*30)%60));
+		int startTotalMin = 9 * 60 + startSlot * 30;
+		int endTotalMin = startTotalMin + slotCount * 30;
+		return formatTime(startTotalMin) + " - " + formatTime(endTotalMin);
+	}
+
+	private static String formatTime(int totalMinutes) {
+		int hour = totalMinutes / 60;
+		int min = totalMinutes % 60;
+		String ampm = hour >= 12 ? "PM" : "AM";
+		if (hour > 12) hour -= 12;
+		if (hour == 0) hour = 12;
+		return hour + ":" + (min < 10 ? "0" : "") + min + " " + ampm;
 	}
 }

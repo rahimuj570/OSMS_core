@@ -49,40 +49,43 @@ public class AddCourseServlet extends HttpServlet {
 			// Insert into courses
 			con.setAutoCommit(false);
 			String sqlCourse = "INSERT INTO courses (course_id, course_type, required_lab, dept_type) VALUES (?,?,?,?)";
-			PreparedStatement psCourse = con.prepareStatement(sqlCourse);
-			psCourse.setString(1, courseId);
-			psCourse.setString(2, courseType);
-			if (requiredLab == null || requiredLab.isEmpty() || courseType.equalsIgnoreCase("THEORY")) {
-				psCourse.setNull(3, java.sql.Types.VARCHAR);
-			} else {
-				psCourse.setString(3, requiredLab);
+			try (PreparedStatement psCourse = con.prepareStatement(sqlCourse)) {
+				psCourse.setString(1, courseId);
+				psCourse.setString(2, courseType);
+				if (requiredLab == null || requiredLab.isEmpty() || courseType.equalsIgnoreCase("THEORY")) {
+					psCourse.setNull(3, java.sql.Types.VARCHAR);
+				} else {
+					psCourse.setString(3, requiredLab);
+				}
+				String deptType = (String) sc.getAttribute("dept_type");
+				psCourse.setString(4, deptType);
+				psCourse.executeUpdate();
 			}
-			String deptType = (String) sc.getAttribute("dept_type");
-			psCourse.setString(4, deptType);
-			psCourse.executeUpdate();
 
 			// Insert preferred teachers
 			if (preferredTeachers != null) {
 				String sqlPref = "INSERT INTO course_preferred_teachers (course_id, teacher_id) VALUES (?,?)";
-				PreparedStatement psPref = con.prepareStatement(sqlPref);
-				for (String tid : preferredTeachers) {
-					psPref.setString(1, courseId);
-					psPref.setInt(2, Integer.parseInt(tid));
-					psPref.addBatch();
+				try (PreparedStatement psPref = con.prepareStatement(sqlPref)) {
+					for (String tid : preferredTeachers) {
+						psPref.setString(1, courseId);
+						psPref.setInt(2, Integer.parseInt(tid));
+						psPref.addBatch();
+					}
+					psPref.executeBatch();
 				}
-				psPref.executeBatch();
 			}
 
 			// Insert forbidden teachers
 			if (forbiddenTeachers != null) {
 				String sqlForb = "INSERT INTO course_forbidden_teachers (course_id, teacher_id) VALUES (?,?)";
-				PreparedStatement psForb = con.prepareStatement(sqlForb);
-				for (String tid : forbiddenTeachers) {
-					psForb.setString(1, courseId);
-					psForb.setInt(2, Integer.parseInt(tid));
-					psForb.addBatch();
+				try (PreparedStatement psForb = con.prepareStatement(sqlForb)) {
+					for (String tid : forbiddenTeachers) {
+						psForb.setString(1, courseId);
+						psForb.setInt(2, Integer.parseInt(tid));
+						psForb.addBatch();
+					}
+					psForb.executeBatch();
 				}
-				psForb.executeBatch();
 			}
 			con.commit();
 			sc.setAttribute("course_true", "Course added successfully!");
@@ -93,12 +96,6 @@ public class AddCourseServlet extends HttpServlet {
 				con.setAutoCommit(true);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			resp.sendRedirect(req.getContextPath()+"/dashboard/courses.jsp");

@@ -43,28 +43,23 @@ public class EditSectionServlet extends HttpServlet {
 			Connection con = ConnectionProvider.getCon();
 			try {
 				String sql = "UPDATE sections SET section_id = ?, students=? WHERE section_id = ?";
-				PreparedStatement ps = con.prepareStatement(sql);
-				ps.setString(1, sectionName);
-				ps.setInt(2, students);
-				ps.setString(3, sectionId);
+				try (PreparedStatement ps = con.prepareStatement(sql)) {
+					ps.setString(1, sectionName);
+					ps.setInt(2, students);
+					ps.setString(3, sectionId);
 
-				int rows = ps.executeUpdate();
+					int rows = ps.executeUpdate();
 
-				if (rows > 0) {
-					sc.setAttribute("section_true", "Successfully updated!");
-				} else {
-					sc.setAttribute("section_false", "Failed to update the section. Try again!");
+					if (rows > 0) {
+						sc.setAttribute("section_true", "Successfully updated!");
+					} else {
+						sc.setAttribute("section_false", "Failed to update the section. Try again!");
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				sc.setAttribute("section_false", "Something went wrong on server-side!");
 			} finally {
-				try {
-					if (con != null)
-						con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
 				response.sendRedirect(request.getContextPath() + "/dashboard/sections.jsp");
 			}
 		}

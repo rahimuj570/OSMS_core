@@ -80,12 +80,6 @@ public class DeleteTeacherServlet extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			try {
-				if (con != null)
-					con.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 			response.sendRedirect(request.getContextPath() + "/dashboard/teachers.jsp");
 
 		}

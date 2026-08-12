@@ -17,6 +17,8 @@ public class AvailabilityHelper {
     public static List<TimeSlotInfo> getTeacherFreeSlots(
             CSPState state,
             Variable variable) {
+    	
+		long lunchMask = ((1L << 2) - 1) << 6; // slots 6 & 7 are lunch
 
         List<TimeSlotInfo> result = new ArrayList<>();
 
@@ -45,6 +47,8 @@ public class AvailabilityHelper {
                         start++) {
 
                     long mask = ((1L << slotCount) - 1) << start;
+                    if ((mask & lunchMask) != 0)
+						continue;
 
                     // Busy
                     if ((occupied[day] & mask) != 0)

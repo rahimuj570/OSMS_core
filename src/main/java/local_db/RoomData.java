@@ -72,10 +72,12 @@ public class RoomData {
 		rooms.clear();
 
 		Connection con = ConnectionProvider.getCon();
+		PreparedStatement pst = null;
+		ResultSet res = null;
 		try {
-			PreparedStatement pst = con
+			pst = con
 					.prepareStatement("select * from rooms where dept_type='" + sc.getAttribute("dept_type")+"'");
-			ResultSet res = pst.executeQuery();
+			res = pst.executeQuery();
 
 			while (res.next()) {
 				String roomId = res.getString("room_id");
@@ -83,25 +85,28 @@ public class RoomData {
 				int capacity = res.getInt("room_capacity");
 				String labType = res.getString("lab_type");
 
-				PreparedStatement pst2 = con.prepareStatement("select * from room_availability  where room_id=?");
-				pst2.setString(1, roomId);
-				ResultSet res2 = pst2.executeQuery();
-//				List<Integer> sv = new ArrayList<>(Collections.nCopies(7, 0));
-				long[] sv = new long[7];
-				while (res2.next()) {
-					int day = res2.getInt("slot_day");
-					int slotValue = res2.getInt("slot_value");
-					sv[day] = slotValue;
-				}
+				try (PreparedStatement pst2 = con.prepareStatement("select * from room_availability  where room_id=?")) {
+					pst2.setString(1, roomId);
+					try (ResultSet res2 = pst2.executeQuery()) {
+						long[] sv = new long[7];
+						while (res2.next()) {
+							int day = res2.getInt("slot_day");
+							int slotValue = res2.getInt("slot_value");
+							sv[day] = slotValue;
+						}
 
-				Room r = new Room(roomId, RoomType.valueOf(roomType), capacity, sv,
-						labType == null ? null : LabType.valueOf(labType));
-				rooms.put(roomId, r);
+						Room r = new Room(roomId, RoomType.valueOf(roomType), capacity, sv,
+								labType == null ? null : LabType.valueOf(labType));
+						rooms.put(roomId, r);
+					}
+				}
 			}
-			pst.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			try { if (res != null) res.close(); } catch (SQLException e) { e.printStackTrace(); }
+			try { if (pst != null) pst.close(); } catch (SQLException e) { e.printStackTrace(); }
 		}
 		return rooms;
 	}
