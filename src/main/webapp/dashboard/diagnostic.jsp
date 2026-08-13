@@ -339,7 +339,7 @@ double completion=((double)assigned*100.0)/vars.size();
         Download an AI-ready prompt containing only the unassigned courses and their conflict-free teacher and room availability.
 
         You can analyze it using
-        <strong>ChatGPT</strong>,
+        <strong><a style="text-decoration: none" href="https://grok.com/">Grok (Recommended)</a></strong>,
         <strong>Gemini</strong>,
         <strong>Claude</strong>,
         or any other AI assistant.
