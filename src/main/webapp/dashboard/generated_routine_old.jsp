@@ -1,4 +1,3 @@
-<%@page import="algorithm.CSPSolver"%>
 <%@page import="local_db.TeacherData"%>
 <%@page import="java.util.Comparator"%>
 <%@page import="algorithm.Value"%>
@@ -7,7 +6,7 @@
 <%@page import="algorithm.Variable"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="entity.Section"%>
-<%@page import="algorithm.Main"%>
+<%@page import="algorithm.RoutineGenerationResult"%>
 <%@page import="algorithm.CSPState"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
@@ -110,7 +109,8 @@ body {
 
 	<main>
 		<%
-		CSPState state = Main.state;
+		RoutineGenerationResult result = (RoutineGenerationResult) session.getAttribute("routineGenerationResult");
+		CSPState state = (result != null) ? result.getState() : null;
 		ArrayList<Variable> vars = new ArrayList<>(state.variables.values());
 		// Sort by day → startSlot
 		vars.sort(
@@ -149,7 +149,7 @@ body {
 						<td><%=day%></td>
 						<td><%=time%></td>
 						<td><%=v.course.id%></td>
-						<td><%=Main.state.teachers.get(val.teacherId).name%></td>
+						<td><%=state.teachers.get(val.teacherId).name%></td>
 						<td><%=val.roomId%></td>
 					</tr>
 

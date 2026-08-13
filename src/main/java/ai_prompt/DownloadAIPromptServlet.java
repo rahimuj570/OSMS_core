@@ -1,6 +1,6 @@
 package ai_prompt;
 
-import algorithm.Main;
+import algorithm.RoutineGenerationResult;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,7 +24,8 @@ public class DownloadAIPromptServlet extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        if (Main.state == null) {
+        Object obj = request.getSession().getAttribute("routineGenerationResult");
+        if (obj == null) {
 
             response.setContentType("text/plain");
 
@@ -34,7 +35,8 @@ public class DownloadAIPromptServlet extends HttpServlet {
             return;
         }
 
-        String prompt = AIPromptGenerator.generate(Main.state);
+        RoutineGenerationResult result = (RoutineGenerationResult) obj;
+        String prompt = AIPromptGenerator.generate(result);
 
         String fileName =
                 "AI_Prompt_"

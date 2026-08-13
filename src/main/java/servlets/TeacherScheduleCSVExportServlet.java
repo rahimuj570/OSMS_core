@@ -13,6 +13,7 @@ import java.util.List;
 
 import algorithm.CSPState;
 import algorithm.Main;
+import algorithm.RoutineGenerationResult;
 import algorithm.RoutinePrinter;
 import algorithm.Value;
 import algorithm.Variable;
@@ -42,7 +43,13 @@ public class TeacherScheduleCSVExportServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        CSPState state = Main.state;
+        Object obj = request.getSession().getAttribute("routineGenerationResult");
+        CSPState state = (obj != null) ? ((RoutineGenerationResult) obj).getState() : null;
+
+        if (state == null) {
+            response.sendRedirect(request.getContextPath() + "/dashboard/generate_routine.jsp");
+            return;
+        }
 
         response.setContentType("text/csv");
         response.setHeader(

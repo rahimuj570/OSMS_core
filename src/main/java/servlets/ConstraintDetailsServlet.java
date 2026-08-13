@@ -11,6 +11,7 @@ import java.util.List;
 import algorithm.AvailabilityHelper;
 import algorithm.CSPState;
 import algorithm.Main;
+import algorithm.RoutineGenerationResult;
 import algorithm.TimeSlotInfo;
 import algorithm.Variable;
 
@@ -33,7 +34,13 @@ public class ConstraintDetailsServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		 CSPState state = Main.state;
+		Object obj = request.getSession().getAttribute("routineGenerationResult");
+		CSPState state = (obj != null) ? ((RoutineGenerationResult) obj).getState() : null;
+
+		if (state == null) {
+			response.sendRedirect(request.getContextPath()+"/dashboard/generate_routine.jsp");
+			return;
+		}
 
 	        String courseId = request.getParameter("course");
 	        String sectionId = request.getParameter("section");

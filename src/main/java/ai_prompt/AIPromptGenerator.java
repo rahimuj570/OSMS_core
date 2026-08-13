@@ -2,7 +2,7 @@ package ai_prompt;
 
 import algorithm.AvailabilityHelper;
 import algorithm.CSPState;
-import algorithm.CSPSolver;
+import algorithm.RoutineGenerationResult;
 import algorithm.TimeSlotInfo;
 import algorithm.Variable;
 import entity.Teacher;
@@ -17,7 +17,8 @@ public class AIPromptGenerator {
     private AIPromptGenerator() {
     }
 
-    public static String generate(CSPState state) {
+    public static String generate(RoutineGenerationResult result) {
+        CSPState state = result.getState();
 
         StringBuilder sb = new StringBuilder();
 
@@ -41,7 +42,7 @@ public class AIPromptGenerator {
 
         }
 
-        appendStatistics(sb, state, unassigned.size());
+        appendStatistics(sb, state, unassigned.size(), result);
 
         sb.append(PromptConstants.FOOTER);
 
@@ -159,7 +160,8 @@ public class AIPromptGenerator {
     private static void appendStatistics(
             StringBuilder sb,
             CSPState state,
-            int unassigned) {
+            int unassigned,
+            RoutineGenerationResult result) {
 
         int total = state.variables.size();
 
@@ -192,13 +194,13 @@ public class AIPromptGenerator {
                 completion));
 
         sb.append("States Explored : ")
-                .append(CSPSolver.getVisitedNodes())
+                .append(result.getVisitedNodes())
                 .append("\n");
 
         sb.append("Search Speed : ")
                 .append(String.format(
                         "%.2f",
-                        CSPSolver.getStatesPerSecond()))
+                        result.getStatesPerSecond()))
                 .append(" states/second\n");
 
         sb.append("\n=====================================================\n\n");

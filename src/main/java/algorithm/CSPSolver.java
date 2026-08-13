@@ -20,10 +20,11 @@ public class CSPSolver {
 	private static boolean shouldTakeFirstSolution = false;
 	private static int bestScore = Integer.MAX_VALUE;
 	private static Map<String, Value> bestAssignment = new HashMap<>();
+	private static long solveTime = 0;
+	public static int MAX_NODES = 1_000_000;
+	private static boolean wasTimedOut = false;
 
 	private static int nodes = 0;
-	private static long solveTime = 0;
-	private static int MAX_NODES = 1_000_000;
 
 	public static Map<String, Value> getBestAssignment() {
 		return bestAssignment;
@@ -48,6 +49,10 @@ public class CSPSolver {
 	        return 0;
 
 	    return nodes / (solveTime / 1000.0);
+	}
+
+	public static boolean wasTimedOut() {
+		return wasTimedOut;
 	}
 
 	/////////////// FOR PARTIAL TBA RESULT
@@ -78,7 +83,7 @@ public class CSPSolver {
 		shouldTakeFirstSolution = false;
 		isSolverRunning = false;
 		routineGenerationPercentage = 0;
-		Main.timeout = false;
+		wasTimedOut = false;
 		nodes = 0;
 		solveTime = 0;
 		bestScore = Integer.MAX_VALUE;
@@ -121,7 +126,7 @@ public class CSPSolver {
 	public static boolean solve(CSPState s) {
 
 		if (++nodes > MAX_NODES) {
-			Main.timeout = true;
+			wasTimedOut = true;
 			return true;
 		}
 

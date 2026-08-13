@@ -11,6 +11,7 @@ import java.util.Map;
 
 import algorithm.CSPSolver;
 import algorithm.Main;
+import algorithm.RoutineGenerationResult;
 import entity.Course;
 import entity.Room;
 import entity.Section;
@@ -54,10 +55,12 @@ public class GenerateRoutineServlet extends HttpServlet {
 
 		if (!CSPSolver.isSolverRunning) {
 			CSPSolver.isSolverRunning = true;
+			final jakarta.servlet.http.HttpSession session = request.getSession();
 			new Thread(() -> {
 				CSPSolver.efficiency = efficiency;
 				CSPSolver.outsidePreferred=outsidePreferred;
-				Main.run(courses, sections, teachers, rooms);
+				RoutineGenerationResult result = Main.run(courses, sections, teachers, rooms);
+				session.setAttribute("routineGenerationResult", result);
 				CSPSolver.isSolverRunning = false;
 			}).start();
 		}

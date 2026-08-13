@@ -21,10 +21,8 @@ import local_db.TeacherData;
 
 public class Main {
 
-	public static boolean timeout = false;
 	public static final int DAYS = 7;
 	public static final int SLOTS_PER_DAY = 14;
-	public static CSPState state;
 
 	static List<Variable> generateVariables(List<Course> courses, Map<String, Section> sections) {
 		List<Variable> vars = new ArrayList<>();
@@ -163,9 +161,6 @@ public class Main {
 		}
 	}
 
-	public static boolean isComplete = false;
-	public static boolean isLabOrientedIncomplete = false;
-
 	public static void main(String[] args) {
 		// Delegate to run() with fresh data from DB (backward compatibility)
 		List<Course> courses = CourseData.getCourses(null);
@@ -177,9 +172,9 @@ public class Main {
 
 	/**
 	 * Entry point that accepts data snapshots directly, avoiding shared static state.
-	 * Used by GenerateRoutineServlet to pass per-request data.
+	 * Returns a per-invocation result object.
 	 */
-	public static void run(List<Course> courses, Map<String, Section> sections,
+	public static RoutineGenerationResult run(List<Course> courses, Map<String, Section> sections,
 			Map<Integer, Teacher> teachers, Map<String, Room> rooms) {
 
 		List<Variable> vars = generateVariables(courses, sections);
@@ -187,7 +182,7 @@ public class Main {
 
 		// Debug output
 		for (Variable v : vars) {
-			System.out.println(v.id + " → domain size: " + v.domain.size());
+			System.out.println(v.id + " -> domain size: " + v.domain.size());
 		}
 
 		// Debug Output
@@ -199,22 +194,23 @@ public class Main {
 			}
 		}
 
-		state = new CSPState(teachers, rooms, sections);
+		CSPState localState = new CSPState(teachers, rooms, sections);
 
 		for (Variable v : vars) {
-			state.variables.put(v.id, v);
+			localState.variables.put(v.id, v);
 		}
 		buildNeighbors(vars);
 
 		CSPSolver.reset();
-		boolean solved = CSPSolver.startSolve(state);
+		boolean solved = CSPSolver.startSolve(localState);
 
 		Map<String, Value> bestAssignment = CSPSolver.getBestAssignment();
 		Set<String> bestSkipped = CSPSolver.getBestSkipped();
+		boolean timeout = CSPSolver.wasTimedOut();
 
-		isComplete = bestAssignment.size() == state.variables.size();
+		boolean complete = bestAssignment.size() == localState.variables.size();
 
-		if (isComplete) {
+		if (complete) {
 		    System.out.println("Complete solution found.");
 		} else {
 		    System.out.println("Partial solution found.");
@@ -225,19 +221,19 @@ public class Main {
 		        System.out.println(id);
 		    }
 		}
-		
+
 
 
 //		 restore best found assignment
 		if (!bestAssignment.isEmpty()) {
 
-			state.clearOccupations();
+			localState.clearOccupations();
 			
-			for (Teacher t : state.teachers.values()) {
-			    state.teacherWeeklyLoad.put(t.id, 0f);
+			for (Teacher t : localState.teachers.values()) {
+			    localState.teacherWeeklyLoad.put(t.id, 0f);
 			}
 
-			for (Variable v : state.variables.values()) {
+			for (Variable v : localState.variables.values()) {
 
 			    Value val = bestAssignment.get(v.id);
 
@@ -252,33 +248,34 @@ public class Main {
 			    v.skipped = false;
 			    v.assignedValue = val;
 
-			    state.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
-			    state.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
-			    state.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
-			    state.teacherWeeklyLoad.put(
+			    localState.teacherOccupied.get(val.teacherId)[val.day] |= val.slotMask;
+			    localState.roomOccupied.get(val.roomId)[val.day] |= val.slotMask;
+			    localState.sectionOccupied.get(v.section.id)[val.day] |= val.slotMask;
+			    localState.teacherWeeklyLoad.put(
 			    	    val.teacherId,
-			    	    state.teacherWeeklyLoad.get(val.teacherId)
+			    	    localState.teacherWeeklyLoad.get(val.teacherId)
 			    	        + ((float) val.slotCount * 30f / 60f)
 			    	);
 			}
 
-			solved = isComplete;
+			solved = complete;
 		}
 
-		isLabOrientedIncomplete = !CSPSolver.isAllLabFitted(state);
+		boolean labOrientedIncomplete = !CSPSolver.isAllLabFitted(localState);
+
 		System.out.println("\nSolved: " + solved);
-		System.out.println("Timeout: " + Main.timeout);
+		System.out.println("Timeout: " + timeout);
 		System.out.println("BestAssignment size: " + CSPSolver.getBestAssignment().size());
 
 		if (bestAssignment.isEmpty()) {
 
 		    System.out.println("No solution found.");
 
-		} else if (Main.timeout) {
+		} else if (timeout) {
 
 		    System.out.println("⚠️ Timeout reached — best found solution used");
 
-		} else if (isComplete) {
+		} else if (complete) {
 
 		    System.out.println("Complete solution restored.");
 
@@ -287,6 +284,11 @@ public class Main {
 		    System.out.println("Partial solution restored.");
 
 		}
+
+		return new RoutineGenerationResult(localState, timeout, complete, labOrientedIncomplete,
+				CSPSolver.getBestAssignment(), CSPSolver.getBestSkipped(),
+				CSPSolver.getVisitedNodes(), CSPSolver.getSolveTime(),
+				CSPSolver.getStatesPerSecond());
 	}
 
 }

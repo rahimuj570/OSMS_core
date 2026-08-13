@@ -1,4 +1,3 @@
-<%@page import="algorithm.CSPSolver"%>
 <%@page import="local_db.TeacherData"%>
 <%@page import="java.util.Comparator"%>
 <%@page import="algorithm.Value"%>
@@ -7,11 +6,17 @@
 <%@page import="algorithm.Variable"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="entity.Section"%>
-<%@page import="algorithm.Main"%>
+<%@page import="algorithm.RoutineGenerationResult"%>
+<%@page import="entity.Section"%>
 <%@page import="algorithm.CSPState"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ page errorPage="no_solution.jsp"%>
+
+<%
+	RoutineGenerationResult result = (RoutineGenerationResult) session.getAttribute("routineGenerationResult");
+	CSPState state = (result != null) ? result.getState() : null;
+%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -164,17 +169,17 @@ body {
 <div class="summary-box">
 
     <div class="summary-item success">
-        <h2><%=CSPSolver.getBestAssignment().size()%></h2>
+        <h2><%=result != null ? result.getBestAssignment().size() : 0%></h2>
         <p>Assigned Classes</p>
     </div>
 
     <div class="summary-item warning">
-        <h2><%=CSPSolver.getBestSkipped().size()%></h2>
+        <h2><%=result != null ? result.getBestSkipped().size() : 0%></h2>
         <p>Unscheduled (TBA)</p>
     </div>
 
     <div class="summary-item">
-        <h2><%=Main.state.variables.size()%></h2>
+        <h2><%=result != null ? result.getState().variables.size() : 0%></h2>
         <p>Total Classes</p>
     </div>
     
@@ -185,17 +190,17 @@ body {
 <div class="summary-box">
 
     <div class="summary-item success">
-        <h2><%= CSPSolver.getVisitedNodes()%></h2>
+        <h2><%= result != null ? result.getVisitedNodes() : 0 %></h2>
         <p>Search States Explored</p>
     </div>
 
     <div class="summary-item warning">
-        <h2><%= String.format("%.2f", CSPSolver.getSolveTime()/1000.0) %> s</h2>
+        <h2><%= result != null ? String.format("%.2f", result.getSolveTimeMs()/1000.0) : "0.00" %> s</h2>
         <p>Execution Time</p>
     </div>
 
     <div class="summary-item">
-        <h2><%= String.format("%,.0f", CSPSolver.getStatesPerSecond()) %></h2>
+        <h2><%= result != null ? String.format("%,.0f", result.getStatesPerSecond()) : "0" %></h2>
         <p>Search States/sec</p>
    
 </div>
@@ -205,7 +210,6 @@ body {
 
 
 <%
-	CSPState state = Main.state;
 	ArrayList<Variable> vars = new ArrayList<>(state.variables.values());
 
 	// Assigned classes first, TBA last
@@ -255,7 +259,7 @@ body {
 	<td><%=day%></td>
 	<td><%=time%></td>
 	<td><%=v.course.id%></td>
-	<td><%=Main.state.teachers.get(val.teacherId).name%></td>
+	<td><%=state.teachers.get(val.teacherId).name%></td>
 	<td><%=val.roomId%></td>
 </tr>
 

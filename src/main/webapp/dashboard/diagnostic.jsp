@@ -1,5 +1,5 @@
 <%@page import="java.util.List"%>
-<%@page import="algorithm.Main"%>
+<%@page import="algorithm.RoutineGenerationResult"%>
 <%@page import="algorithm.CSPState"%>
 <%@page import="algorithm.Variable"%>
 <%@page import="java.util.ArrayList"%>
@@ -258,7 +258,8 @@ textarea{
 
 <%
 
-CSPState state=Main.state;
+RoutineGenerationResult result = (RoutineGenerationResult) session.getAttribute("routineGenerationResult");
+CSPState state = (result != null) ? result.getState() : null;
 
 ArrayList<Variable> vars=new ArrayList<>(state.variables.values());
 

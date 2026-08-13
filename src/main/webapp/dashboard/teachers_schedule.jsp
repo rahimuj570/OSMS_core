@@ -6,7 +6,7 @@
 <%@page import="algorithm.RoutinePrinter"%>
 <%@page import="algorithm.Variable"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="algorithm.Main"%>
+<%@page import="algorithm.RoutineGenerationResult"%>
 <%@page import="algorithm.CSPState"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -330,8 +330,10 @@ tbody tr:hover{
 
 <%
 
-CSPState state = Main.state;
+RoutineGenerationResult result = (RoutineGenerationResult) session.getAttribute("routineGenerationResult");
+CSPState state = (result != null) ? result.getState() : null;
 
+if (state != null) {
 ArrayList<Variable> vars = new ArrayList<>(state.variables.values());
 
 vars.removeIf(v -> !v.assigned || v.assignedValue == null);
@@ -633,5 +635,17 @@ Printed on
 
 </div>
 
+</body>
+<%
+} else {
+%>
+<div class="header">
+<h1>No Routine Generated</h1>
+<p>Please generate a routine first.</p>
+</div>
+<div class="btn-area">
+<a href="courses.jsp" class="btn">🏠 Home</a>
+</div>
+<% } %>
 </body>
 </html>

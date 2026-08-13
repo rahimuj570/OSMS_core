@@ -1,7 +1,7 @@
+<%@page import="algorithm.CSPState"%>
 <%@page import="entity.CourseType"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="algorithm.Main"%>
-<%@page import="algorithm.CSPSolver"%>
+<%@page import="algorithm.RoutineGenerationResult"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ page isErrorPage="true"%>
@@ -117,20 +117,24 @@ int countUnassigned = 0;
 int countUnassignedTheory = 0;
 int countUnassignedLab = 0;
 int countUnasignedLabOrientedTheory = 0;
-ArrayList<String>unassigedVarId=new ArrayList<String>();
-for (var a : Main.state.variables.values()) {
-	if (a.assigned) {
-		countAssigned++;
-	} else {
-		countUnassigned++;
-		if (a.course.type == CourseType.LAB) {
-			countUnassignedLab++;
-		} else if (a.course.type == CourseType.THEORY) {
-			countUnassignedTheory++;
+ArrayList<String> unassigedVarId = new ArrayList<String>();
+RoutineGenerationResult result = (RoutineGenerationResult) session.getAttribute("routineGenerationResult");
+CSPState state = (result != null) ? result.getState() : null;
+if (state != null) {
+	for (var a : state.variables.values()) {
+		if (a.assigned) {
+			countAssigned++;
 		} else {
-			countUnasignedLabOrientedTheory++;
+			countUnassigned++;
+			if (a.course.type == CourseType.LAB) {
+				countUnassignedLab++;
+			} else if (a.course.type == CourseType.THEORY) {
+				countUnassignedTheory++;
+			} else {
+				countUnasignedLabOrientedTheory++;
+			}
+			unassigedVarId.add(a.id);
 		}
-		unassigedVarId.add(a.id);
 	}
 }
 
@@ -143,20 +147,19 @@ for (var a : Main.state.variables.values()) {
 			<h2>Status</h2>
 
 <%
-boolean partialSolution =
-    CSPSolver.getBestAssignment().size() > 0;
+boolean partialSolution = (result != null && result.getBestAssignment() != null) ? result.getBestAssignment().size() > 0 : false;
 %>
 
 <ul class="status-list">
 
-<% if(Main.timeout && partialSolution){ %>
+<% if(result != null && result.isTimeout() && partialSolution){ %>
 
     <li><strong>Status:</strong> Partial Solution Generated</li>
     <li><strong>Reason:</strong> Search timeout reached before completion</li>
-    <li><strong>Assigned Classes:</strong> <%=CSPSolver.getBestAssignment().size()%></li>
+    <li><strong>Assigned Classes:</strong> <%=result != null ? result.getBestAssignment().size() : 0%></li>
     <li><a href="tba_generated_routine.jsp"><button class="print-btn"> View TBA Partial Routinw</button></a></li>
 
-<% } else if(Main.timeout){ %>
+<% } else if(result != null && result.isTimeout()){ %>
 
     <li><strong>Status:</strong> Timeout</li>
     <li><strong>Reason:</strong> No partial solution found before timeout</li>
@@ -176,7 +179,7 @@ boolean partialSolution =
 			<table class="routine-table">
 				<tr>
 					<th>Total Variables</th>
-					<td><%=Main.state.variables.size() %></td>
+					<td><%=state != null ? state.variables.size() : 0 %></td>
 				</tr>
 				<tr>
 					<th>Assigned Variables</th>
