@@ -1,14 +1,10 @@
 package algorithm;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Per-invocation result of a routine generation run.
- *
- * Main's generation result/state is now scoped to an individual run, but CSPSolver
- * still contains static mutable state and therefore the complete solver is NOT thread-safe.
- */
 public class RoutineGenerationResult {
 
     private final CSPState state;
@@ -21,18 +17,27 @@ public class RoutineGenerationResult {
     private final long solveTimeMs;
     private final double statesPerSecond;
 
-    public RoutineGenerationResult(CSPState state, boolean timeout,
-                                   boolean complete, boolean labOrientedIncomplete,
-                                   Map<String, Value> bestAssignment,
-                                   Set<String> bestSkipped,
-                                   int visitedNodes, long solveTimeMs,
-                                   double statesPerSecond) {
+    public RoutineGenerationResult(
+            CSPState state,
+            boolean timeout,
+            boolean complete,
+            boolean labOrientedIncomplete,
+            Map<String, Value> bestAssignment,
+            Set<String> bestSkipped,
+            int visitedNodes,
+            long solveTimeMs,
+            double statesPerSecond) {
+
         this.state = state;
         this.timeout = timeout;
         this.complete = complete;
         this.labOrientedIncomplete = labOrientedIncomplete;
-        this.bestAssignment = bestAssignment;
-        this.bestSkipped = bestSkipped;
+
+        // Defensive copies.
+        // CSPSolver's collections are static and mutable.
+        this.bestAssignment = new HashMap<>(bestAssignment);
+        this.bestSkipped = new HashSet<>(bestSkipped);
+
         this.visitedNodes = visitedNodes;
         this.solveTimeMs = solveTimeMs;
         this.statesPerSecond = statesPerSecond;
