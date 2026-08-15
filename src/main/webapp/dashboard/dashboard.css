@@ -12,6 +12,8 @@ body {
 	color: #333;
 }
 
+
+
 /* Navbar */
 .navbar {
 	background-color: #5c0931;
@@ -44,6 +46,11 @@ body {
 
 .nav-links a:hover {
 	text-decoration: underline;
+}
+
+.nav-links a.active {
+	border: 1px solid;
+    padding: 5px;
 }
 
 .menu-toggle {
