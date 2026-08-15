@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import algorithm.CSPSolver;
+import algorithm.GenerationManager;
 import algorithm.Main;
 import algorithm.RoutineGenerationResult;
 import entity.Course;
@@ -49,22 +50,50 @@ public class GenerateRoutineServlet extends HttpServlet {
 		Map<String, Room> rooms = RoomData.getRooms(request.getSession());
 		List<Course> courses = CourseData.getCourses(request.getSession());
 		Map<Integer, Teacher> teachers = TeacherData.getTeachers(request.getSession());
-		
+
 		String efficiency = request.getParameter("efficiency");
 		String outsidePreferred = request.getParameter("outsidePreferred");
 
-		if (!CSPSolver.isSolverRunning) {
-			CSPSolver.isSolverRunning = true;
+		if (GenerationManager.start()) {
+			// We claimed ownership — start generation in background thread
 			final jakarta.servlet.http.HttpSession session = request.getSession();
+
 			new Thread(() -> {
 				CSPSolver.efficiency = efficiency;
-				CSPSolver.outsidePreferred=outsidePreferred;
-				RoutineGenerationResult result = Main.run(courses, sections, teachers, rooms);
-				session.setAttribute("routineGenerationResult", result);
-				CSPSolver.isSolverRunning = false;
+				CSPSolver.outsidePreferred = outsidePreferred;
+
+				try {
+					RoutineGenerationResult result =
+							Main.run(courses, sections, teachers, rooms);
+					session.setAttribute("routineGenerationResult", result);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					GenerationManager.finish();
+				}
 			}).start();
+
+			response.sendRedirect(
+					request.getContextPath() + "/dashboard/generate_routine.jsp"
+							+ "?efficiency=" + urlEncode(efficiency)
+							+ "&outsidePreferred=" + urlEncode(outsidePreferred));
+		} else {
+			// Another generation is already running — send to waiting page
+			response.sendRedirect(
+					request.getContextPath() + "/dashboard/waiting.jsp"
+							+ "?efficiency=" + urlEncode(efficiency)
+							+ "&outsidePreferred=" + urlEncode(outsidePreferred));
 		}
-		response.sendRedirect(request.getContextPath() + "/dashboard/generate_routine.jsp");
+	}
+
+	private static String urlEncode(String value) {
+		if (value == null)
+			return "";
+		try {
+			return java.net.URLEncoder.encode(value, "UTF-8");
+		} catch (Exception e) {
+			return value;
+		}
 	}
 
 	/**

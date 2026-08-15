@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import algorithm.CSPSolver;
+import algorithm.GenerationManager;
 
 /**
  * Servlet implementation class GetRotineProgressServlet
@@ -30,10 +30,10 @@ public class GetRoutineProgressServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
 
 		response.setContentType("application/json");
-		response.getWriter().write("{ \"percentage\": " + CSPSolver.routineGenerationPercentage + " }");
+		response.getWriter().write("{ \"running\": " + GenerationManager.isRunning()
+				+ ", \"percentage\": " + GenerationManager.getPercentage() + " }");
 
 	}
 

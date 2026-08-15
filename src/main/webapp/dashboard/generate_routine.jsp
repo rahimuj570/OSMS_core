@@ -59,14 +59,18 @@ h1 {
 
   <script>
 async function fetchProgress() {
-  const response = await fetch('<%=request.getContextPath()%>/GetRoutineProgressServlet');
+  const eff = encodeURIComponent('<%=request.getParameter("efficiency") != null ? request.getParameter("efficiency") : "" %>');
+  const outside = encodeURIComponent('<%=request.getParameter("outsidePreferred") != null ? request.getParameter("outsidePreferred") : "" %>');
+  const url = '<%=request.getContextPath()%>/GetRoutineProgressServlet?efficiency=' + eff + '&outsidePreferred=' + outside;
+
+  const response = await fetch(url);
   const data = await response.json();
-  const percent = Math.max(0, Math.min(100, data.percentage));
+  const percent = Math.max(0, Math.min(100, data.percentage || 0));
 
   document.getElementById('progress').style.width = percent + '%';
   document.getElementById('progress-text').textContent = percent + '%';
 
-  if (percent === 100) {
+  if (!data.running && percent === 100) {
     window.location.href = '<%=request.getContextPath()%>/dashboard/generated_routine.jsp';
   }
 }

@@ -11,8 +11,8 @@ import entity.Teacher;
 
 public class CSPSolver {
 
-	public static int routineGenerationPercentage = 0;
-	public static boolean isSolverRunning = false;
+	public static volatile int routineGenerationPercentage = 0;
+	public static volatile boolean isSolverRunning = false;
 	public static String efficiency = "";
 	public static String outsidePreferred = "";
 
